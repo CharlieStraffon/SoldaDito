@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Administración{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Administración</h1>
+<p class="small text-muted">Los datos ya eran editables por seed/código; aquí la UI (D6). Las ediciones se marcan manual y no se pisan en re-seed.</p>
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-pend">Pendientes ({{ pending|length }})</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-margin">Márgenes</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-targets">Objetivos / fees</button></li>
+</ul>
+
+<div class="tab-content">
+  {# --- Reclasificar pendientes --- #}
+  <div class="tab-pane fade show active" id="tab-pend">
+    {% for a in pending %}
+    <div class="card mb-2"><div class="card-body py-2">
+      <div class="fw-semibold mb-2">{{ a.name }} <span class="badge text-bg-dark">{{ platform_labels[a.platform] }}</span> <span class="text-muted small">{{ a.currency }}</span></div>
+      <form method="post" action="{{ url_for('admin.classify', account_id=a.id) }}" class="row g-2 align-items-end">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="col-md-2"><label class="form-label small mb-0">Cliente</label>
+          <select name="client_id" class="form-select form-select-sm">
+            <option value="">—</option>
+            {% for c in clients %}<option value="{{ c.id }}" {{ 'selected' if a.client_id==c.id }}>{{ c.name }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-2"><label class="form-label small mb-0">Panel</label>
+          <select name="panel_type" class="form-select form-select-sm">
+            <option value="">—</option>{% for p in panel_types %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-2"><label class="form-label small mb-0">Valor</label>
+          <select name="value_source" class="form-select form-select-sm">
+            <option value="">—</option>{% for v in value_sources %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-2"><label class="form-label small mb-0">Captura primaria</label>
+          <select name="primary_capture" class="form-select form-select-sm">
+            <option value="">—</option>{% for c in capture_methods %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-2"><label class="form-label small mb-0">Propósito</label>
+          <select name="purpose" class="form-select form-select-sm">
+            {% for p in purposes %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+          </select></div>
+        <div class="col-md-2"><button class="btn btn-sm btn-primary w-100">Clasificar</button></div>
+      </form>
+    </div></div>
+    {% else %}<p class="text-muted">No hay cuentas pendientes. 🎉</p>{% endfor %}
+  </div>
+
+  {# --- Márgenes --- #}
+  <div class="tab-pane fade" id="tab-margin">
+    <div class="table-responsive"><table class="table table-sm align-middle">
+      <thead class="table-light"><tr><th>Cliente</th><th>Margen actual</th><th>Editar</th></tr></thead>
+      <tbody>
+      {% for c in clients %}
+      <tr><td>{{ c.name }}</td><td class="metric-num">{{ '%.0f%%' % ((c.margin_pct or 0.35)*100) }}</td>
+        <td><form method="post" action="{{ url_for('admin.margin', client_id=c.id) }}" class="d-flex gap-1">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <input type="number" step="0.01" min="0" max="1" name="margin_pct" value="{{ c.margin_pct or 0.35 }}" class="form-control form-control-sm" style="width:6rem">
+          <button class="btn btn-sm btn-outline-primary">Guardar</button>
+        </form></td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+
+  {# --- Objetivos / fees --- #}
+  <div class="tab-pane fade" id="tab-targets">
+    <div class="table-responsive"><table class="table table-sm align-middle">
+      <thead class="table-light"><tr><th>Cuenta</th><th>CPA obj.</th><th>ROAS obj.</th><th>Presupuesto</th><th>Fee</th><th></th></tr></thead>
+      <tbody>
+      {% for a in accounts if not a.panel_type is none %}
+      <tr><td class="small">{{ a.name }} <span class="badge text-bg-light">{{ platform_labels[a.platform] }}</span></td>
+        <form method="post" action="{{ url_for('admin.targets', account_id=a.id) }}">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <td><input name="target_cpa" value="{{ a.target_cpa or '' }}" class="form-control form-control-sm" style="width:6rem"></td>
+          <td><input name="target_roas" value="{{ a.target_roas or '' }}" class="form-control form-control-sm" style="width:6rem"></td>
+          <td><input name="monthly_budget" value="{{ a.monthly_budget or '' }}" class="form-control form-control-sm" style="width:7rem"></td>
+          <td><input name="monthly_fee" value="{{ a.monthly_fee or '' }}" class="form-control form-control-sm" style="width:7rem"></td>
+          <td><button class="btn btn-sm btn-outline-primary">Guardar</button></td>
+        </form>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+{% endblock %}

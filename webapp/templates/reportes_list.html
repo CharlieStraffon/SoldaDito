@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Reportes{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Reportes a cliente</h1>
+  {% include "partials/month_selector.html" %}
+</div>
+<div class="row row-cols-1 row-cols-md-3 g-3">
+{% for it in items %}
+  <div class="col"><div class="card h-100"><div class="card-body">
+    <h2 class="h6">{{ it.client.name }}</h2>
+    <span class="badge text-bg-dark">{{ platform_labels[it.platform] }}</span>
+    <span class="small text-muted">{{ it.n }} cuenta(s)</span>
+    <div class="mt-2"><a class="btn btn-sm btn-primary" href="{{ url_for('reports.report', client_slug=it.client.slug, platform=it.platform, year=year, month=month) }}">Ver reporte</a></div>
+  </div></div></div>
+{% endfor %}
+</div>
+{% endblock %}

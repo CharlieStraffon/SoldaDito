@@ -50,6 +50,16 @@
 
 {% include "partials/datepicker.html" %}
 
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  <a href="{{ url_for('alerts.index') }}" class="text-decoration-none">
+    <span class="badge text-bg-danger fs-6">{{ summary.alert_counts['critico'] }} críticas</span></a>
+  <a href="{{ url_for('alerts.index') }}" class="text-decoration-none">
+    <span class="badge text-bg-warning fs-6">{{ summary.alert_counts['rendimiento'] }} rendimiento</span></a>
+  <a href="{{ url_for('alerts.index') }}" class="text-decoration-none">
+    <span class="badge text-bg-success fs-6">{{ summary.alert_counts['positivo'] }} positivas</span></a>
+  <span class="text-muted small align-self-center">solo críticas se empujan; rendimiento y positivas, calladas</span>
+</div>
+
 {% for platform in platforms %}
 <div class="card mb-3">
   <div class="card-header d-flex justify-content-between align-items-center">
