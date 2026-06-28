@@ -71,6 +71,70 @@
 
 <div class="card mb-3"><div class="card-header"><strong>Tendencia diaria</strong> ({{ period[0].strftime('%d %b') }} – {{ period[1].strftime('%d %b') }})</div>
 <div class="card-body"><canvas id="trend" height="90"></canvas></div></div>
+
+<div class="row g-3">
+  {# --- Registro de acciones (cruce acción <-> resultado) --- #}
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Acciones</strong>
+        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#newAction">+ Registrar</button>
+      </div>
+      <div class="collapse" id="newAction"><div class="card-body bg-body-tertiary border-bottom">
+        <form method="post" action="{{ url_for('actions.create', account_id=account.id) }}" class="row g-2 align-items-end">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <div class="col-auto"><label class="form-label small mb-0">Tipo</label>
+            <select name="action_type" class="form-select form-select-sm">
+              {% for t in action_types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+            </select></div>
+          <div class="col-auto"><label class="form-label small mb-0">Nuevo valor (presup.)</label>
+            <input class="form-control form-control-sm" name="new_value" placeholder="$"></div>
+          <div class="col"><label class="form-label small mb-0">Nota / hipótesis</label>
+            <input class="form-control form-control-sm" name="note"></div>
+          <div class="col-auto"><button class="btn btn-sm btn-primary">Guardar</button></div>
+        </form>
+      </div></div>
+      <ul class="list-group list-group-flush">
+        {% for e in actions %}
+        <li class="list-group-item py-2">
+          <span class="badge text-bg-info">{{ e.action_type }}</span>
+          {% if e.old_value or e.new_value %}<span class="metric-num">{{ e.old_value or '—' }} → {{ e.new_value or '—' }}</span>{% endif %}
+          <span class="small text-muted">{{ e.at.strftime('%d %b %H:%M') }}</span>
+          {% if e.note %}<div class="small">{{ e.note }}</div>{% endif %}
+        </li>
+        {% else %}<li class="list-group-item text-muted small">Sin acciones registradas.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  {# --- Perfil de medición (offline=NO -> bandera de riesgo) --- #}
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header"><strong>Perfil de medición</strong></div>
+      <div class="card-body">
+        {% set mp = measurement %}
+        {% if mp and mp.offline_import == false %}
+        <div class="alert alert-warning py-2 small mb-2"><strong>⚠ Importación offline = NO.</strong>
+          Sin esto la plataforma optimiza a leads baratos, no a leads que cierran. Causa raíz del valor manual.</div>
+        {% endif %}
+        <form method="post" action="{{ url_for('accounts.measurement', account_id=account.id) }}">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          {% set fields = [('pixel_ok','Pixel'),('capi_ok','CAPI'),('ga4_linked','GA4'),('enhanced_conversions','Enhanced conv.'),('offline_import','Import offline'),('domain_verified','Dominio verif.'),('consent_mode','Consent mode')] %}
+          {% for f, label in fields %}
+          {% set val = mp[f] if mp else none %}
+          <div class="row mb-1 align-items-center"><div class="col-6 small">{{ label }}</div>
+            <div class="col-6"><select name="{{ f }}" class="form-select form-select-sm">
+              <option value="" {{ 'selected' if val is none }}>—</option>
+              <option value="yes" {{ 'selected' if val == true }}>Sí</option>
+              <option value="no" {{ 'selected' if val == false }}>No</option>
+            </select></div></div>
+          {% endfor %}
+          <button class="btn btn-sm btn-outline-primary mt-2">Guardar perfil</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

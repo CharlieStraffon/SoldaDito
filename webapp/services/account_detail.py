@@ -26,6 +26,8 @@ def build(account, start, end):
         Alert.query.filter(Alert.account_id == account.id, Alert.status != ALERT_RESOLVED)
         .order_by(Alert.date.desc()).limit(10).all()
     )
+    from . import actions as act_svc
+    recent_actions = act_svc.recent(account.id)
 
     return {
         "account": account,
@@ -39,4 +41,6 @@ def build(account, start, end):
         "period": (start, end),
         "prior": (p_start, p_end),
         "alerts": active_alerts,
+        "actions": recent_actions,
+        "measurement": account.measurement,
     }

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Registro de acciones{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Registro de acciones</h1>
+  <div class="btn-group btn-group-sm">
+    <a class="btn {{ 'btn-dark' if not current_type else 'btn-outline-secondary' }}" href="{{ url_for('actions.index') }}">Todas</a>
+    {% for t in action_types %}
+    <a class="btn {{ 'btn-dark' if current_type==t else 'btn-outline-secondary' }}" href="?type={{ t }}">{{ t }}</a>
+    {% endfor %}
+  </div>
+</div>
+<p class="small text-muted">El cruce acción ↔ resultado (antes se perdía). Cambios de presupuesto con histórico old→new.</p>
+<div class="table-responsive"><table class="table table-sm align-middle">
+  <thead class="table-light"><tr><th>Fecha</th><th>Cuenta</th><th>Tipo</th><th>Antes</th><th>Después</th><th>Nota</th></tr></thead>
+  <tbody>
+  {% for e in entries %}
+    <tr>
+      <td class="small">{{ e.at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td><a href="{{ url_for('accounts.detail', account_id=e.account_id) }}" class="text-decoration-none">{{ e.account.name }}</a></td>
+      <td><span class="badge text-bg-info">{{ e.action_type }}</span></td>
+      <td class="metric-num">{{ e.old_value or '—' }}</td>
+      <td class="metric-num">{{ e.new_value or '—' }}</td>
+      <td class="small">{{ e.note or '' }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="text-center text-muted py-3">Sin acciones registradas.</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}
