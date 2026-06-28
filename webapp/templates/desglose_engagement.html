@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Desglose · {{ client.name }}{% endblock %}
+{% set names = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'] %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+  <h1 class="h4 mb-0">{{ client.name }} · {{ platform_labels[platform] }}
+    <span class="text-muted fs-6">{{ names[month] }} {{ year }}</span></h1>
+  <div class="d-flex gap-2">
+    {% include "partials/month_selector.html" %}
+    <a href="{{ url_for('history.index', year=year, month=month) }}" class="btn btn-sm btn-outline-secondary">← Lista</a>
+  </div>
+</div>
+
+{# --- KPIs del engagement --- #}
+{% set m = engagement %}
+{% if m %}
+<div class="row row-cols-2 row-cols-md-5 g-2 mb-3">
+  <div class="col"><div class="card h-100"><div class="card-body py-2"><div class="small text-muted">ROI (canónico)</div>
+    <div class="h4 mb-0">{% if m.roi is not none %}<span class="badge {{ 'text-bg-success' if m.roi>=1 else 'text-bg-danger' }}">{{ m.roi|ratio }}</span>{% else %}—{% endif %}</div>
+    <div class="small text-muted">(Σmonto×margen)/(ΣAds+fee)</div></div></div></div>
+  <div class="col"><div class="card h-100"><div class="card-body py-2"><div class="small text-muted">Utilidad neta</div>
+    <div class="h4 mb-0 metric-num {{ 'delta-up' if m.utilidad_neta is not none and m.utilidad_neta<0 else '' }}">{{ m.utilidad_neta|money(m.currency) }}</div></div></div></div>
+  <div class="col"><div class="card h-100"><div class="card-body py-2"><div class="small text-muted">CAC</div>
+    <div class="h4 mb-0 metric-num">{{ m.cac|money if m.cac is not none else '—' }}</div></div></div></div>
+  <div class="col"><div class="card h-100"><div class="card-body py-2"><div class="small text-muted">Honorarios (1×)</div>
+    <div class="h4 mb-0 metric-num">{{ m.honorarios|money }}</div></div></div></div>
+  <div class="col"><div class="card h-100"><div class="card-body py-2"><div class="small text-muted">Margen</div>
+    <div class="h4 mb-0 metric-num">{{ (m.margin_pct*100)|round(0)|int }}%</div></div></div></div>
+</div>
+{% endif %}
+
+{# --- Grilla editable por cuenta-mes --- #}
+<div class="card mb-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong>Cuentas del engagement</strong>
+    {% if is_closed %}<span class="badge text-bg-secondary">MES CERRADO · margen y fee congelados</span>{% endif %}
+  </div>
+  <div class="table-responsive">
+  <table class="table table-sm align-middle mb-0">
+    <thead class="table-light"><tr>
+      <th>Cuenta</th>
+      <th class="text-end">Inversión <span class="badge badge-api">API</span></th>
+      <th class="text-end">Resultado <span class="badge badge-api">API</span></th>
+      <th class="text-end">Ventas</th><th class="text-end">Monto</th>
+      <th class="text-end">CPA/CPL</th><th class="text-end">ROAS</th><th class="text-end">AOV</th>
+      <th>Acción</th>
+    </tr></thead>
+    <tbody>
+    {% for account, row in rows %}
+      {% set is_ecom = (row.panel_type_snapshot == 'ecommerce') %}
+      <tr>
+        <td>{{ account.name }}{% if account.location_label %} <span class="badge text-bg-light">{{ account.location_label }}</span>{% endif %}</td>
+        <td class="text-end metric-num">{{ row.inversion|money(row.currency) }}</td>
+        <td class="text-end metric-num">{{ (row.ventas if is_ecom else row.prospectos)|num }}</td>
+        <td class="text-end metric-num">{{ row.ventas|num }}
+          {% if row.ventas_source == 'manual' %}<span class="badge badge-manual">M</span>{% elif row.ventas_source=='api' %}<span class="badge badge-api">API</span>{% endif %}</td>
+        <td class="text-end metric-num">{{ row.monto_venta|money }}
+          {% if row.monto_source == 'manual' %}<span class="badge badge-manual">M</span>{% elif row.monto_source=='api' %}<span class="badge badge-api">API</span>{% endif %}</td>
+        <td class="text-end metric-num">{{ (row.cpa if is_ecom else row.cpl)|money }}</td>
+        <td class="text-end metric-num">{{ row.roas|ratio if row.roas is not none else '—' }}</td>
+        <td class="text-end metric-num">{{ row.aov|money if row.aov is not none else '—' }}</td>
+        <td>
+          {% if not is_closed and not is_ecom %}
+          <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#edit{{ account.id }}">Capturar cierre</button>
+          {% elif is_ecom %}<span class="small text-muted">auto (pixel)</span>{% endif %}
+        </td>
+      </tr>
+      {% if not is_closed and not is_ecom %}
+      <tr class="collapse" id="edit{{ account.id }}"><td colspan="9" class="bg-body-tertiary">
+        <form method="post" action="{{ url_for('history.save', account_id=account.id) }}" class="row g-2 align-items-end">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <input type="hidden" name="year" value="{{ year }}"><input type="hidden" name="month" value="{{ month }}">
+          <div class="col-auto"><label class="form-label small mb-0">Ventas concretadas</label>
+            <input class="form-control form-control-sm" type="number" step="any" name="ventas" value="{{ row.ventas or '' }}"></div>
+          <div class="col-auto"><label class="form-label small mb-0">Monto de venta</label>
+            <input class="form-control form-control-sm" type="number" step="any" name="monto_venta" value="{{ row.monto_venta or '' }}"></div>
+          <div class="col-auto"><label class="form-label small mb-0">Ventas totales (opc.)</label>
+            <input class="form-control form-control-sm" type="number" step="any" name="ventas_totales" value="{{ row.ventas_totales or '' }}"></div>
+          <div class="col-auto"><button class="btn btn-sm btn-primary" type="submit">Guardar</button></div>
+        </form>
+      </td></tr>
+      {% endif %}
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{# --- Cierre de mes --- #}
+<div class="d-flex gap-2">
+  {% if not is_closed %}
+  <form method="post" action="{{ url_for('history.close', client_slug=client.slug, platform=platform) }}"
+        onsubmit="return confirm('Cerrar el mes congela margen y fee, y bloquea la edición. ¿Continuar?');">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="year" value="{{ year }}"><input type="hidden" name="month" value="{{ month }}">
+    <button class="btn btn-success" type="submit">Cerrar mes</button>
+  </form>
+  {% else %}
+  <form method="post" action="{{ url_for('history.reopen', client_slug=client.slug, platform=platform) }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="year" value="{{ year }}"><input type="hidden" name="month" value="{{ month }}">
+    <button class="btn btn-outline-secondary" type="submit">Reabrir mes</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

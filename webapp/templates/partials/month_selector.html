@@ -1,0 +1,14 @@
+{# Selector de mes (year/month). base_url se pasa para mantener la ruta. #}
+<form method="get" class="d-inline-flex gap-2 align-items-center">
+  <select name="month" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+    {% set names = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'] %}
+    {% for m in range(1,13) %}
+      <option value="{{ m }}" {{ 'selected' if m == month }}>{{ names[m] }}</option>
+    {% endfor %}
+  </select>
+  <select name="year" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+    {% for y in [2025, 2026] %}
+      <option value="{{ y }}" {{ 'selected' if y == year }}>{{ y }}</option>
+    {% endfor %}
+  </select>
+</form>

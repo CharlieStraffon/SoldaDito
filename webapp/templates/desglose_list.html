@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Desglose mensual{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Desglose mensual · rentabilidad por engagement</h1>
+  {% include "partials/month_selector.html" %}
+</div>
+<p class="small text-muted">Engagement = cliente × plataforma. ROI canónico con honorarios + margen. Peor-primero (no rentables arriba).</p>
+
+<div class="table-responsive">
+<table class="table table-sm table-hover align-middle scan-table">
+  <thead class="table-light"><tr>
+    <th>Cliente</th><th>Plataforma</th><th class="text-end">Inversión</th><th class="text-end">Ventas</th>
+    <th class="text-end">Monto</th><th class="text-end">Honorarios</th><th class="text-end">Utilidad neta</th>
+    <th class="text-end">ROI</th><th class="text-end">CAC</th><th></th><th></th>
+  </tr></thead>
+  <tbody>
+  {% for c in cards %}
+    {% set m = c.metrics %}
+    <tr>
+      <td class="fw-semibold">{{ c.client.name }}</td>
+      <td><span class="badge text-bg-dark">{{ platform_labels[c.platform] }}</span></td>
+      <td class="text-end metric-num">{{ m.sum_inversion|money(m.currency) if m else '—' }}</td>
+      <td class="text-end metric-num">{{ m.sum_ventas|num if m else '—' }}</td>
+      <td class="text-end metric-num">{{ m.sum_monto|money if m else '—' }}</td>
+      <td class="text-end metric-num">{{ m.honorarios|money if m else '—' }}</td>
+      <td class="text-end metric-num {{ 'delta-up' if m and m.utilidad_neta is not none and m.utilidad_neta < 0 else 'delta-down' }}">
+        {{ m.utilidad_neta|money if m else '—' }}</td>
+      <td class="text-end metric-num">
+        {% if m and m.roi is not none %}
+          <span class="badge {{ 'text-bg-success' if m.roi >= 1 else 'text-bg-danger' }}">{{ m.roi|ratio }}</span>
+        {% else %}—{% endif %}</td>
+      <td class="text-end metric-num">{{ m.cac|money if m and m.cac is not none else '—' }}</td>
+      <td>{% if m and m.is_closed %}<span class="badge text-bg-secondary">cerrado</span>{% else %}<span class="badge text-bg-light">abierto</span>{% endif %}</td>
+      <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('history.engagement', client_slug=c.client.slug, platform=c.platform, year=year, month=month) }}">Abrir</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="11" class="text-center text-muted py-3">Sin engagements activos.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
