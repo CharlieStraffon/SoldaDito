@@ -1,0 +1,5 @@
+# Clientes de API en vivo (opcional). Instalar solo cuando se sincroniza contra
+# Meta/Google reales. Los módulos de webapp/clients los importan perezosamente.
+-r requirements.txt
+facebook_business==21.0.5
+google-ads==25.1.0

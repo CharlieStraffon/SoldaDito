@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+
+# Virtualenv
+.venv/
+venv/
+env/
+
+# Env / secrets
+.env
+*.env
+!.env.example
+
+# SQLite (no se versiona — el histórico entra por seed)
+instance/*.db
+instance/*.db-wal
+instance/*.db-shm
+instance/*.sqlite
+
+# OS
+.DS_Store
+
+# Flask / Alembic local
+*.log
+
+# Notion export & pillar PDFs stay out of git history if large (docs/*.md are kept)
+docs/*.pdf

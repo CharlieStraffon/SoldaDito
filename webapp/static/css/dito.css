@@ -1,0 +1,23 @@
+/* DITO — estilos base. Responsive de primera clase (Bootstrap 5.3 + ajustes). */
+:root {
+  --dito-crit: #dc3545;
+  --dito-warn: #fd7e14;
+  --dito-ok: #198754;
+  --dito-muted: #6c757d;
+}
+body { font-size: 0.95rem; }
+.metric-num { font-variant-numeric: tabular-nums; font-weight: 600; }
+.delta-up { color: var(--dito-crit); }
+.delta-down { color: var(--dito-ok); }
+.badge-api { background: #0d6efd; }
+.badge-manual { background: #6c757d; }
+.badge-calc { background: #20c997; }
+.sev-critico { border-left: 4px solid var(--dito-crit); }
+.sev-rendimiento { border-left: 4px solid var(--dito-warn); }
+.sev-positivo { border-left: 4px solid var(--dito-ok); }
+.worst-first tr:first-child { font-weight: 600; }
+.scan-table td, .scan-table th { white-space: nowrap; vertical-align: middle; }
+.pendiente { opacity: 0.7; }
+@media (max-width: 768px) {
+  .scan-table { font-size: 0.85rem; }
+}

@@ -1,0 +1,17 @@
+# DITO / SoldaDito — core (suficiente para levantar, seed por fallback, y tests)
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.36
+Flask-Migrate==4.0.7
+alembic==1.13.3
+APScheduler==3.10.4
+python-dotenv==1.0.1
+python-dateutil==2.9.0.post0
+requests==2.32.3
+anthropic==0.39.0
+Jinja2==3.1.4
+pytest==8.3.3
+
+# Clientes de API en vivo (opcional — ver requirements-sync.txt):
+#   facebook_business, google-ads
+# Se importan de forma perezosa; el app y los tests corren sin ellos.

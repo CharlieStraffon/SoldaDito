@@ -1,0 +1,200 @@
+# ELEVADO - Boundless Industries
+
+Proyecto: Meta Ads (https://www.notion.so/Meta-Ads-a88c06c3423b4a2cb812c0e394709331?pvs=21)
+Cliente: https://www.notion.so/fc9b636edd944949b61a2cd57d9fa64d
+ETAPA: Optimización
+TESTEANDO: CORRIENDO
+Hypothesis: Website Lead Gen Campaign 
+Inicio del Test: 30 de diciembre de 2025
+Días desde último test: 177
+ALERTA: 🚨 Over 60 days
+META : MANTENIMIENTO
+FEE: 2130,43 MXN
+PRESUPUESTO: 5326,07 MXN
+CATEGORÍA DE PROYECTO: BAJO
+Negociación Fee: No
+Created time: 23 de abril de 2026 16:34
+
+# TO-DO LIST POR ETAPA DEL PROYECTO
+
+# TESTING
+
+### A/B TESTING ANUNCIOS
+
+Objetivos  
+
+- [ ]  3 primeros resultados obtenidos.
+
+Tareas Específicas.
+
+- [ ]  Comunicación semanal con el cliente. 
+Mini reporte.
+- [ ]  Se empieza a usar el doc Tracker de KPI’s: [https://docs.google.com/spreadsheets/d/1DCF8LcIkmmEkMJEd_vm1hoVf0aV8241LeGjaWW488v8/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1DCF8LcIkmmEkMJEd_vm1hoVf0aV8241LeGjaWW488v8/edit?usp=sharing)
+- [ ]  Se empieza a usar el doc Presupuesto Diario - Clientes META Ads
+[https://docs.google.com/spreadsheets/d/1cVlaoFYu3Qqv5rWFt6L3IM836MpNPLraCoKkFvu83g0/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1cVlaoFYu3Qqv5rWFt6L3IM836MpNPLraCoKkFvu83g0/edit?usp=sharing)
+
+# ESTABILIZACIÓN
+
+Objetivos 
+
+- [ ]  Anuncio(s) ganadores identificados.
+- [ ]  Resultados constantes por 2 semanas.
+
+Tareas Específicas.
+
+- [ ]  Optimización semanal de presupuesto y anuncios.
+- [ ]  Medición y estandarización del CPA.
+- [ ]  Se analizan los anuncios ganadores y, en algunos casos, el embudo de venta con el Sistema de Inteligencia de Anuncios:
+
+[https://docs.google.com/spreadsheets/d/1z3SozuySmWlDj7Z_r4km9Qw1ZXx-FAY7FiT3vJcdus8/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1z3SozuySmWlDj7Z_r4km9Qw1ZXx-FAY7FiT3vJcdus8/edit?usp=sharing)
+(copiar este archivo y agregarlo en la carpeta de Drive del cliente)
+
+# OPTIMIZACIÓN
+
+Objetivos 
+
+- [ ]  Resultados constantes y estables por 3 meses.
+- [ ]  Definir Metas / KPI’s **trimestrales** junto al cliente. 
+Usar el Looker Studio General y Bajar Cierres en el doc [Tracker de KPI’s](https://docs.google.com/spreadsheets/d/1DCF8LcIkmmEkMJEd_vm1hoVf0aV8241LeGjaWW488v8/edit?usp=sharing)
+https://lookerstudio.google.com/reporting/eef12e82-f7f5-4331-8e52-d7cdfd9a25ba
+- [ ]  Reducir CPA y aumentar resultados.
+- [ ]  Tener Visibilidad del impacto financiero de la publicidad en el negocio. 
+(Es indispensable para poder Escalar)
+    - [ ]  **ROAS**
+    - [ ]  **ROI**
+    - [ ]  **CAC**
+    - [ ]  **LTV**
+    - [ ]  **COGS**
+
+Tareas Específicas.
+
+- (DELIMITAR TIEMPOS - Estrcuturar Mes Metodología)
+- Con quienes sí, con quienes no. 
+- Cuanto tiempo invertir. PRIORIZAR. 
+Hasta donde sí y hasta dónde no automatizar o delegar. (Puntos críticos, peligrosos) 
+
+Cuántas implementaciones según logevidad del proyecto. 
+
+EVERGREEN ADS vs SPECIFIC PROMOS ADS
+
+- [ ]  Trabajar variantes/cambios de Anuncios Ganadores 
+[](https://docs.google.com/document/d/1laFHZYaswKDVY1ko1iYVk6InM1Kijsxxje_ShFyqwX0/edit?usp=sharing)[https://docs.google.com/document/d/1ddOthU0jMNriz6-wK76s5XY5Qtcw9Rm8IAs3jcCdf_4/edit?usp=sharing](https://docs.google.com/document/d/1ddOthU0jMNriz6-wK76s5XY5Qtcw9Rm8IAs3jcCdf_4/edit?usp=sharing)
+(copiar este archivo y agregarlo en la carpeta de Drive del cliente)
+
+- [ ]  Planificar y Desarrollar Nuevos Creativos (nuevas hipótesis)
+
+Diseño de creativos con equipo interno: 
+[https://docs.google.com/spreadsheets/d/1Uh9oKgS_qmUlgogY7jz0LvPhOdqdk2D0KdQX0EBwFBo/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1Uh9oKgS_qmUlgogY7jz0LvPhOdqdk2D0KdQX0EBwFBo/edit?usp=sharing)
+
+Trabajando con editor y/o proveedor:
+    
+    [https://docs.google.com/document/d/1laFHZYaswKDVY1ko1iYVk6InM1Kijsxxje_ShFyqwX0/edit?usp=sharing](https://docs.google.com/document/d/1laFHZYaswKDVY1ko1iYVk6InM1Kijsxxje_ShFyqwX0/edit?usp=sharing)
+    (copiar este archivo y agregarlo en la carpeta de Drive del cliente)
+    
+    - [ ]  Investigación / referencias Ads Library. (Cada 2 meses)
+    [https://docs.google.com/spreadsheets/d/1WIMGLu0EyHru8u2wT9sA9VjL00kWY3Vwwd_3NjpwPRc/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1WIMGLu0EyHru8u2wT9sA9VjL00kWY3Vwwd_3NjpwPRc/edit?usp=sharing)
+
+- [ ]  Hacer cierre mensuales de KPIs
+- [ ]  Remarketing ( estrategia dirigida a clientes )
+- [ ]  Retargeting (estrategia dirigida a MOFU & BOFU)
+- [ ]  Empezar a hacer proyecciones de presuesto en el doc [Presupuesto Diario.](https://docs.google.com/spreadsheets/d/1cVlaoFYu3Qqv5rWFt6L3IM836MpNPLraCoKkFvu83g0/edit?usp=sharing)
+- [ ]  Mensualmente se analizan los anuncios ganadores con el [Sistema de Inteligencia de Anuncios](https://docs.google.com/spreadsheets/d/1z3SozuySmWlDj7Z_r4km9Qw1ZXx-FAY7FiT3vJcdus8/edit?usp=sharing).
+
+### 🧩 ESTRUCTURA GENERAL DEL SISTEMA SII
+
+Se divide en dos grandes categorías:
+
+**1️⃣ Implementaciones Operativas (peso 1)**
+
+> Son acciones tácticas y repetitivas que afectan directamente el rendimiento diario de las campañas.
+> 
+> 
+> Deben tener un impacto medible en métricas clave (CTR, CPA, ROAS, etc.).
+> 
+
+| Implementación | Descripción | Frecuencia típica | Peso sugerido | Ejemplo de impacto esperado |
+| --- | --- | --- | --- | --- |
+| **Subir nuevos creativos** | Cargar nuevos anuncios ya aprobados al BM y configurarlos. | Semanal | 1.0 | Mejora del CTR o engagement inicial. |
+| **Planificar nuevos creativos** | Brief + estructura de mensajes, ideas o tests A/B para próximos anuncios. | Quincenal | 1.5 | Renovación del mensaje antes de fatiga. |
+| **Distribuir anuncios ganadores** | Mover o duplicar anuncios con mejor performance a nuevas audiencias o ubicaciones. | Quincenal | 1.0 | Escalamiento sin perder eficiencia. |
+| **Restructurar campañas** | Cambiar estructura de CBO/ABO, duplicar ad sets o limpiar campañas. | Mensual | 2.0 | Estabilización del CPA o del aprendizaje. |
+| **Ajuste de audiencias** | Refinar, excluir o crear nuevas audiencias lookalike o de remarketing. | Quincenal | 1.5 | Mejora en segmentación y CTR. |
+| **Cambio de presupuesto** | Subir o bajar inversión general según fase o performance. | Semanal | 0.5 | Optimización de inversión. |
+
+> 💡 Cada implementación operativa se registra con fecha, responsable, cliente y resultado posterior.
+> 
+
+### **2️⃣ Implementaciones Estratégicas (peso 2-3)**
+
+> Son acciones de alto impacto que buscan mejorar la estructura, propuesta o estrategia del negocio o cuenta publicitaria.
+> 
+
+| Implementación | Descripción | Peso sugerido | Ejemplo de impacto esperado |
+| --- | --- | --- | --- |
+| **Propuestas de mejoras al negocio** | Diagnóstico de nuevas oportunidades (upsells, optimización de oferta, cambios de mensaje). | 3.0 | Incremento en conversión o ticket promedio. |
+| **Revisión estratégica trimestral** | Evaluación completa del funnel, audiencias, creativos y resultados. | 2.5 | Alineación de objetivos y nuevas metas. |
+| **Optimización de embudo o landing** | Revisión UX, copy, estructura y CTA de la página destino. | 3.0 | Mejora en tasa de conversión. |
+| **Análisis comparativo de performance (mes a mes)** | Documentar qué cambios generaron impacto real y proponer ajustes. | 2.0 | Aprendizaje para próximas campañas. |
+| **Creación de frameworks o procesos nuevos** | Sistematizar una mejora (por ejemplo, un proceso de testing creativo). | 3.0 | Escalabilidad interna y ahorro de tiempo. |
+| **Automatizaciones o integraciones nuevas** | Conexión de Make, CRM, o pixel que optimiza el flujo. | 3.0 | Ahorro de horas operativas y reducción de errores. |
+| **Benchmarking competitivo** | Investigación de competidores y oportunidades de posicionamiento. | 2.0 | Nuevas ideas creativas o de targeting. |
+| **Otras (según necesidad)** | Ej. “Creación de Scorecard de Diagnóstico”, “Nueva propuesta de funnel post-webinar”. | Variable | Depende del alcance. |
+
+# ESCALAR
+
+Cierre Trimestral = Definir KPI’s a medir para determinar *SALUD* del proyecto 
+
+Cierre Semestral / Anual = Redefinir acuerdo comercial según el estatus / salud del proyecto. 
+
+Objetivos  
+
+- [ ]  Ajustar el esquema del acuerdo comercial.
+    - [ ]  Comisión por resultado
+    - [ ]  Aumentar Fee Mensual
+- [ ]  Exponenciar los resultados del proyecto.
+
+Tareas Específicas. Existen 3 vías. 
+Lo ideal es que solo avancemos con 1 o 2 al mismo tiempo, para poder medir el impacto sin muchas variables.
+
+## MORE
+
+- [ ]  Más presupuesto
+- [ ]  Más anuncios
+
+## NEW
+
+- [ ]  Plataforma
+    - [ ]  Meta Ads
+    - [ ]  Google Ads
+        - [ ]  Youtube Ads
+        - [ ]  Google My Business
+    - [ ]  Tiktok Ads
+    - [ ]  Estrategias de Retención & Fidelización
+- [ ]  Nueva Oferta
+    - [ ]  Producto
+    - [ ]  Servicio
+    - [ ]  Negocio
+
+## BETTER
+
+- [ ]  Mejorar los Anuncios
+    - [ ]  Estrategia Narrativa de los anuncios ganadores.
+    - [ ]  Mejorar la Calidad de producción.
+- [ ]  Mejoras en el Embudo Web
+- [ ]  Mejoras en el Proceso Comercial (CRM + Automatización + Calendarios)
+- [ ]  Mejorar la Oferta
+    - [ ]  Estrategia
+    - [ ]  Nicho nuevo
+    - [ ]  Promoción
+    - [ ]  Lead Magnet
+
+# CONTINGENCIA
+
+Objetivos 
+
+- [ ]  3 primeros resultados obtenidos en 2 semanas después de reactivar las campañas.
+
+Tareas Específicas.
+
+- [ ]  Reunión de contingencia con el cliente.
+- [ ]  Implementar ajustes en la estrategia / anuncios / campañas.
