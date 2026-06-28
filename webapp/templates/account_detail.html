@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ account.client.name if account.client else account.name }}{% endblock %}
+
+{% macro kpi(label, value, sub="") %}
+<div class="col">
+  <div class="card h-100"><div class="card-body py-2">
+    <div class="small text-muted">{{ label }}</div>
+    <div class="h4 mb-0 metric-num">{{ value }}</div>
+    {% if sub %}<div class="small text-muted">{{ sub }}</div>{% endif %}
+  </div></div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+  <div>
+    <h1 class="h4 mb-1">
+      {{ account.client.name if account.client else account.name }}
+      {% if account.location_label %}<span class="badge text-bg-secondary">{{ account.location_label }}</span>{% endif %}
+    </h1>
+    <div class="small">
+      <span class="badge text-bg-dark">{{ PLATFORM_LABELS[account.platform] }}</span>
+      {% if cat.panel %}<span class="badge text-bg-info text-uppercase">{{ cat.panel }}</span>
+      {% else %}<span class="badge text-bg-warning">pendiente de clasificar</span>{% endif %}
+      <span class="badge {{ 'badge-api' if cat.value_badge[0]=='auto' else 'badge-manual' }}">{{ cat.value_badge[1] }}</span>
+      <span class="text-muted">· {{ account.currency }} · {{ account.etapa or '—' }}</span>
+    </div>
+    {% if cat.captures|length > 1 %}
+    <div class="small text-muted mt-1">Capturas: {{ cat.captures|join(', ') }} (primaria: {{ cat.primary_capture }})</div>
+    {% endif %}
+  </div>
+  <a href="{{ url_for('dashboard.index') }}" class="btn btn-sm btn-outline-secondary">← Centro de control</a>
+</div>
+
+<div class="row row-cols-2 row-cols-md-5 g-2 mb-3">
+  {{ kpi(hero.result_label|capitalize, hero.resultado|num) }}
+  {{ kpi(hero.cost_label, hero.costo_resultado|money) }}
+  {% if cat.panel == 'ecommerce' %}{{ kpi("ROAS", hero.roas|ratio if hero.roas is not none else '—') }}{% endif %}
+  {{ kpi("Inversión", hero.inversion|money(account.currency)) }}
+  {% if hero.has_real_value %}{{ kpi("Valor", hero.conversion_value|money(account.currency)) }}{% endif %}
+</div>
+
+{% if cat.panel == 'ecommerce' and funnel %}
+<div class="card mb-3"><div class="card-header"><strong>Embudo</strong></div>
+<div class="card-body"><div class="row text-center">
+  <div class="col"><div class="h5 metric-num">{{ funnel.clicks|num }}</div><div class="small text-muted">Clics</div></div>
+  <div class="col"><div class="h5 metric-num">{{ funnel.add_to_cart|num }}</div><div class="small text-muted">Add to cart</div></div>
+  <div class="col"><div class="h5 metric-num">{{ funnel.checkout|num }}</div><div class="small text-muted">Checkout</div></div>
+  <div class="col"><div class="h5 metric-num">{{ funnel.purchases|num }}</div><div class="small text-muted">Compras</div></div>
+</div></div></div>
+{% else %}
+<div class="card mb-3"><div class="card-header"><strong>Panel de leads</strong></div>
+<div class="card-body">
+  <p class="mb-1">Resultado primario: <strong>{{ hero.result_label }}</strong> · {{ hero.resultado|num }} en el periodo.</p>
+  {% if cat.value_source == 'manual_close' %}
+  <p class="small text-muted mb-0">El valor/ROI de esta cuenta proviene del <strong>cierre manual</strong> (se captura en el desglose mensual). El valor de plataforma se ignora.</p>
+  {% endif %}
+</div></div>
+{% endif %}
+
+<div class="card mb-3"><div class="card-header"><strong>Tendencia diaria</strong> ({{ period[0].strftime('%d %b') }} – {{ period[1].strftime('%d %b') }})</div>
+<div class="card-body"><canvas id="trend" height="90"></canvas></div></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+const daily = {{ daily|tojson }};
+const labels = daily.map(d => d.date);
+new Chart(document.getElementById('trend'), {
+  type: 'line',
+  data: { labels, datasets: [
+    { label: 'Inversión', data: daily.map(d=>d.cost), borderColor:'#dc3545', tension:.3, yAxisID:'y' },
+    { label: '{{ hero.result_label }}', data: daily.map(d=>d.conversions), borderColor:'#0d6efd', tension:.3, yAxisID:'y1' },
+  ]},
+  options: { responsive:true, interaction:{mode:'index',intersect:false},
+    scales:{ y:{position:'left'}, y1:{position:'right', grid:{drawOnChartArea:false}} } }
+});
+</script>
+{% endblock %}

@@ -33,9 +33,47 @@ def create_app(config_object=Config):
     app.jinja_env.globals["PLATFORM_GOOGLE_ADS"] = PLATFORM_GOOGLE_ADS
     app.jinja_env.globals["PLATFORM_FACEBOOK_ADS"] = PLATFORM_FACEBOOK_ADS
 
+    _register_filters(app)
+
     _register_blueprints(app)
 
     return app
+
+
+def _register_filters(app):
+    """Filtros de presentación. Un número nunca sin contexto (formato consistente)."""
+
+    @app.template_filter("money")
+    def money(v, currency=""):
+        if v is None:
+            return "—"
+        s = f"{v:,.2f}"
+        return f"{s} {currency}".strip()
+
+    @app.template_filter("num")
+    def num(v, dec=0):
+        if v is None:
+            return "—"
+        return f"{v:,.{dec}f}"
+
+    @app.template_filter("ratio")
+    def ratio(v):
+        if v is None:
+            return "—"
+        return f"{v:,.2f}×"
+
+    @app.template_filter("pctf")
+    def pctf(v, dec=2):
+        if v is None:
+            return "—"
+        return f"{v:.{dec}f}%"
+
+    @app.template_filter("signed_pct")
+    def signed_pct(v, dec=1):
+        if v is None:
+            return "—"
+        sign = "+" if v > 0 else ""
+        return f"{sign}{v:.{dec}f}%"
 
 
 def _register_blueprints(app):

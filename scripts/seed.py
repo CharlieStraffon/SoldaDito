@@ -12,6 +12,7 @@ Idempotencia:
 import shutil
 import sqlite3
 import sys
+from datetime import date
 from pathlib import Path
 
 from config import Config
@@ -24,6 +25,8 @@ from webapp.constants import (
 from webapp.database import db
 from webapp.models import (
     Account,
+    Campaign,
+    CampaignMetric,
     Client,
     MeasurementProfile,
     MonthlyHistory,
@@ -300,6 +303,77 @@ def _g(row, key, default=None):
 
 
 # --------------------------------------------------------------------------- #
+# 5. Sync data (campañas + métricas diarias) — import del legacy (real, demo)
+# --------------------------------------------------------------------------- #
+_METRIC_COLS = (
+    "impressions", "clicks", "cost", "conversions", "conversion_value", "ctr",
+    "conversion_rate", "messages", "frequency", "reach", "link_clicks",
+    "unique_link_clicks", "thruplays", "add_to_cart", "initiate_checkout",
+    "add_payment_info", "purchases", "purchases_value", "leads", "leads_value",
+    "search_budget_lost_impression_share",
+)
+
+
+def import_legacy_sync_data(snap):
+    """Importa campaigns + campaign_metrics del dito.db legacy (datos reales).
+    En vivo, el sync los mantiene; aquí poblamos para que el tablero tenga números."""
+    if not snap:
+        return (0, 0)
+    con = sqlite3.connect(f"file:{snap}?mode=ro", uri=True)
+    con.row_factory = sqlite3.Row
+    try:
+        legacy_camps = con.execute(
+            "SELECT c.*, a.platform AS a_plat, a.external_account_id AS a_ext "
+            "FROM campaigns c JOIN accounts a ON a.id = c.account_id"
+        ).fetchall()
+        legacy_metrics = con.execute("SELECT * FROM campaign_metrics").fetchall()
+    except sqlite3.OperationalError:
+        con.close()
+        return (0, 0)
+    con.close()
+
+    camp_map = {}  # legacy campaign id -> our campaign id
+    for lc in legacy_camps:
+        acct = Account.query.filter_by(platform=lc["a_plat"], external_account_id=lc["a_ext"]).first()
+        if acct is None:
+            continue
+        ext = str(lc["external_campaign_id"])
+        camp = Campaign.query.filter_by(platform=acct.platform, external_campaign_id=ext).first()
+        if camp is None:
+            camp = Campaign(platform=acct.platform, external_campaign_id=ext, account_id=acct.id)
+            db.session.add(camp)
+        camp.account_id = acct.id
+        camp.name = lc["name"]
+        camp.campaign_type = lc["campaign_type"]
+        camp.status = lc["status"]
+        camp.daily_budget = _g(lc, "daily_budget")
+        camp.bidding_strategy_type = _g(lc, "bidding_strategy_type")
+        db.session.flush()
+        camp_map[lc["id"]] = camp.id
+    db.session.commit()
+
+    existing = set(db.session.query(CampaignMetric.campaign_id, CampaignMetric.date).all())
+    new_objs = []
+    for m in legacy_metrics:
+        cid = camp_map.get(m["campaign_id"])
+        if not cid:
+            continue
+        d = m["date"]
+        if isinstance(d, str):
+            d = date.fromisoformat(d)
+        if (cid, d) in existing:
+            continue
+        kwargs = {"campaign_id": cid, "date": d, "platform": m["platform"]}
+        for col in _METRIC_COLS:
+            kwargs[col] = _g(m, col, 0) or 0
+        new_objs.append(CampaignMetric(**kwargs))
+    if new_objs:
+        db.session.bulk_save_objects(new_objs)
+        db.session.commit()
+    return (len(camp_map), len(new_objs))
+
+
+# --------------------------------------------------------------------------- #
 # Orquestación
 # --------------------------------------------------------------------------- #
 def seed_all(verbose=True):
@@ -310,12 +384,15 @@ def seed_all(verbose=True):
     stats = seed_accounts(roster, members)
     snap = _legacy_snapshot()
     hist = import_legacy_monthly_history(snap)
+    camps, metrics = import_legacy_sync_data(snap)
     if verbose:
         print(f"[seed] roster source = {source} ({len(roster)} cuentas)")
         print(f"[seed] accounts: {stats}")
         print(f"[seed] monthly_history importado: {hist} filas")
+        print(f"[seed] sync data: {camps} campañas · {metrics} métricas nuevas")
         print(f"[seed] clientes: {Client.query.count()} · team: {TeamMember.query.count()}")
-    return {"roster_source": source, "roster_count": len(roster), "accounts": stats, "history": hist}
+    return {"roster_source": source, "roster_count": len(roster), "accounts": stats,
+            "history": hist, "campaigns": camps, "metrics": metrics}
 
 
 def main():

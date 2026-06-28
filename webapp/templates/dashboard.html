@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Centro de control{% endblock %}
+
+{% macro delta_badge(row) %}
+  {% if row.delta_pct is not none %}
+    <span class="{{ 'delta-up' if row.adverse else 'delta-down' }}">{{ row.delta_pct|signed_pct }}</span>
+  {% else %}<span class="text-muted">—</span>{% endif %}
+{% endmacro %}
+
+{% macro account_table(rows, currency_note) %}
+<div class="table-responsive">
+  <table class="table table-sm table-hover align-middle scan-table mb-0">
+    <thead class="table-light">
+      <tr>
+        <th>Cuenta</th><th class="text-end">Resultado</th><th class="text-end">Costo/result.</th>
+        <th class="text-end">ROAS</th><th class="text-end">Inversión</th>
+        <th class="text-end">Δ vs anterior</th><th></th>
+      </tr>
+    </thead>
+    <tbody class="worst-first">
+      {% for row in rows %}
+      <tr class="{{ 'table-warning' if row.concern and row.concern > 20 else '' }}">
+        <td>
+          <a href="{{ url_for('accounts.detail', account_id=row.account.id) }}" class="text-decoration-none fw-semibold">
+            {{ row.account.client.name if row.account.client else row.account.name }}
+          </a>
+          {% if row.account.location_label %}<span class="badge text-bg-light">{{ row.account.location_label }}</span>{% endif %}
+          <div class="small text-muted">{{ row.cur.result_label }} · {{ row.account.currency }}</div>
+        </td>
+        <td class="text-end metric-num">{{ row.cur.resultado|num }}</td>
+        <td class="text-end metric-num">{{ row.cur.costo_resultado|money }}</td>
+        <td class="text-end metric-num">{{ row.cur.roas|ratio if row.cur.roas is not none else '—' }}</td>
+        <td class="text-end metric-num">{{ row.cur.inversion|money(row.account.currency) }}</td>
+        <td class="text-end">{{ delta_badge(row) }}</td>
+        <td>{% if row.silent %}<span class="badge text-bg-danger">silenciada</span>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="text-muted text-center py-3">Sin cuentas con datos en el periodo.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h1 class="h4 mb-0">Centro de control</h1>
+  <span class="text-muted small">Peor-primero · separado por plataforma · sin totales de agencia</span>
+</div>
+
+{% include "partials/datepicker.html" %}
+
+{% for platform in platforms %}
+<div class="card mb-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong>{{ platform_labels[platform] }}</strong>
+    <span class="small text-muted">{{ summary.by_platform[platform]|length }} cuentas</span>
+  </div>
+  <div class="card-body p-0">
+    {{ account_table(summary.by_platform[platform]) }}
+  </div>
+</div>
+{% endfor %}
+
+{% if summary.pending %}
+<div class="card mb-3 border-warning">
+  <div class="card-header bg-warning-subtle"><strong>Pendientes de clasificar</strong> ({{ summary.pending|length }})</div>
+  <div class="card-body">
+    <p class="small text-muted mb-2">Cuentas conectadas sin mapeo en la matriz. Nunca se les asume un tipo.</p>
+    {% for a in summary.pending %}
+      <a href="{{ url_for('admin.index') }}" class="badge text-bg-light text-decoration-none">{{ a.name }} ({{ platform_labels[a.platform] }})</a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

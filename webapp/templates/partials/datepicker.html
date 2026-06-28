@@ -1,0 +1,30 @@
+{# Date picker: presets + rango personalizado. Compara vs periodo anterior. #}
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="get" class="row g-2 align-items-center" id="period-form">
+      <div class="col-auto">
+        <div class="btn-group btn-group-sm" role="group">
+          {% for p in presets %}
+          <a class="btn {{ 'btn-primary' if preset == p else 'btn-outline-secondary' }}"
+             href="?preset={{ p }}">{{ preset_labels[p] }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-auto ms-auto d-flex align-items-center gap-2">
+        <input type="text" name="start" value="{{ start.isoformat() }}" class="form-control form-control-sm flatpickr-date" style="width:8rem" placeholder="Desde">
+        <span class="text-muted">→</span>
+        <input type="text" name="end" value="{{ end.isoformat() }}" class="form-control form-control-sm flatpickr-date" style="width:8rem" placeholder="Hasta">
+        <button class="btn btn-sm btn-dark" type="submit">Aplicar</button>
+      </div>
+    </form>
+    <div class="small text-muted mt-1">
+      Periodo: <strong>{{ start.strftime('%d %b %Y') }} – {{ end.strftime('%d %b %Y') }}</strong>
+      · compara vs {{ summary.prior[0].strftime('%d %b') }} – {{ summary.prior[1].strftime('%d %b') }}
+    </div>
+  </div>
+</div>
+<script>
+  document.querySelectorAll('.flatpickr-date').forEach(function(el){
+    flatpickr(el, {dateFormat: "Y-m-d", locale: "es"});
+  });
+</script>
