@@ -32,6 +32,17 @@
   <a href="{{ url_for('dashboard.index') }}" class="btn btn-sm btn-outline-secondary">← Centro de control</a>
 </div>
 
+{% if alerts %}
+<div class="mb-3">
+  {% for a in alerts %}
+  <div class="alert alert-{{ 'danger' if a.severity=='critico' else ('warning' if a.severity=='rendimiento' else 'success') }} py-2 mb-2">
+    <strong>{{ a.kind }}</strong> · {{ a.ai_explanation or a.message }}
+    {% if a.delta_pct is not none %}<span class="small">(Δ {{ a.delta_pct|signed_pct }}, {{ a.days_sustained }}d)</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 <div class="row row-cols-2 row-cols-md-5 g-2 mb-3">
   {{ kpi(hero.result_label|capitalize, hero.resultado|num) }}
   {{ kpi(hero.cost_label, hero.costo_resultado|money) }}

@@ -1,5 +1,6 @@
 """Construye el detalle de una cuenta (panel por tipo)."""
-from ..constants import PANEL_ECOMMERCE
+from ..constants import ALERT_RESOLVED, PANEL_ECOMMERCE
+from ..models import Alert
 from . import categorization as cat
 from . import metrics
 
@@ -21,6 +22,11 @@ def build(account, start, end):
             "purchases": agg.get("purchases", 0) or agg.get("conversions", 0),
         }
 
+    active_alerts = (
+        Alert.query.filter(Alert.account_id == account.id, Alert.status != ALERT_RESOLVED)
+        .order_by(Alert.date.desc()).limit(10).all()
+    )
+
     return {
         "account": account,
         "row": row,
@@ -32,4 +38,5 @@ def build(account, start, end):
         "agg": agg,
         "period": (start, end),
         "prior": (p_start, p_end),
+        "alerts": active_alerts,
     }
