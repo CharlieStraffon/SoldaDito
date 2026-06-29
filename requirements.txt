@@ -10,6 +10,7 @@ python-dateutil==2.9.0.post0
 requests==2.32.3
 anthropic==0.39.0
 Jinja2==3.1.4
+gunicorn==21.2.0
 pytest==8.3.3
 
 # Clientes de API en vivo (opcional — ver requirements-sync.txt):

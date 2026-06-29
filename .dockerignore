@@ -1,0 +1,18 @@
+.git
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+instance/*.db
+instance/*.db-wal
+instance/*.db-shm
+.env
+*.env
+!.env.example
+.DS_Store
+DOCUMENTOS PILAR/
+GESTIÓN DE PROYECTOS NOTION/
+tests/
+docs/*.pdf
