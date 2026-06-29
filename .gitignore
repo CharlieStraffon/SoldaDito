@@ -30,3 +30,7 @@ instance/*.sqlite
 
 # Notion export & pillar PDFs stay out of git history if large (docs/*.md are kept)
 docs/*.pdf
+
+# Material fuente confidencial (insumos del build, NO parte de la app)
+DOCUMENTOS PILAR/
+GESTI*N DE PROYECTOS NOTION/
