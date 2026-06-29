@@ -1,0 +1,5 @@
+<div class="kgrid">
+  {% for k in d.secondary %}
+  <div class="k"><div class="l">{{ k.l }}</div><div class="v {{ 'bad' if k.bad }}">{{ k.v }}</div>{% if k.n %}<div class="n">{{ k.n }}</div>{% endif %}</div>
+  {% endfor %}
+</div>

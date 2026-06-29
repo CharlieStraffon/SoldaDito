@@ -1,0 +1,16 @@
+{% include 'accounts/_hero.html' %}
+{% include 'accounts/_kgrid.html' %}
+{% include 'accounts/_ai.html' %}
+<div class="block">
+  <h3>Frecuencia</h3>
+  <div class="sub">Cuántas veces ve cada persona el anuncio. Arriba de 3.5 es zona de saturación.</div>
+  <div class="freqband">
+    <div class="freqtrack">
+      <div class="z z1"></div><div class="z z2"></div><div class="z z3"></div>
+      <div class="freqmarker" data-v="{{ d.freqband.value }}" style="left:{{ d.freqband.marker }}%"></div>
+    </div>
+    <div class="freqlabels"><span class="fz1">0 — saludable</span><span class="fz2">2.5–3.5 vigilar</span><span class="fz3">saturado — 5+</span></div>
+  </div>
+</div>
+{% include 'accounts/_chart.html' %}
+{% include 'accounts/_campaigns.html' %}

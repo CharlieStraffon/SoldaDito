@@ -1,0 +1,17 @@
+{% include 'accounts/_hero.html' %}
+{% include 'accounts/_kgrid.html' %}
+{% include 'accounts/_ai.html' %}
+<div class="block">
+  <h3>Embudo de conversión</h3><div class="sub">Cómo bajan los usuarios desde la impresión hasta la compra</div>
+  <div class="funnel">
+    {% for s in d.funnel %}
+    <div class="fstep">
+      <div class="fl">{{ s.label }}</div>
+      <div class="ftrack"><div class="fbar {{ 'last' if s.is_last }}" style="width:{{ s.width }}%">{{ s.value }}</div></div>
+      <div class="frate">{{ s.rate }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% include 'accounts/_chart.html' %}
+{% include 'accounts/_campaigns.html' %}

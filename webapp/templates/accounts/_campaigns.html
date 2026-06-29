@@ -1,0 +1,18 @@
+<div class="block"><h3>Campañas</h3><div class="sub">Estado y rendimiento de cada campaña</div>
+  <table class="camp-table">
+    <thead><tr><th>Campaña</th><th>Estado</th>{% for col in d.camp_cols %}<th class="num">{{ col }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {% for c in d.camp_rows %}
+      {% set activa = c.status == 'ENABLED' or c.status == 'ACTIVE' %}
+      <tr class="{{ '' if activa else 'paused' }}">
+        <td><div class="camp-name">{{ c.name }}</div></td>
+        <td><span class="cstatus {{ 'activa' if activa else 'pausada' }}">{{ 'activa' if activa else 'pausada' }}</span></td>
+        <td class="num">{{ c.c1 }}</td><td class="num">{{ c.c2 }}</td><td class="num">{{ c.c3 }}</td>
+        <td class="num {{ 'bad' if c.c4_bad }}">{{ c.c4 }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="color:var(--ink-5);font-size:13px">Sin campañas en el período.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

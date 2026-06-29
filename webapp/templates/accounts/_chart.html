@@ -1,0 +1,9 @@
+<div class="block">
+  <h3>Tendencias</h3>
+  <div class="sub">{{ d.daily.series[1].label }}, inversión y {{ d.daily.series[2].label }} a lo largo del tiempo · {{ d.period_label }}</div>
+  {% if d.daily.has_data %}
+  <div class="chartbox"><canvas id="chartDailyCombined"></canvas></div>
+  {% else %}
+  <div class="chart-empty">No hay datos en este período. Prueba con un rango más amplio en el selector de fecha.</div>
+  {% endif %}
+</div>

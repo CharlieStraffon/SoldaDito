@@ -133,6 +133,9 @@ class Account(db.Model):
     purpose = db.Column(db.String(40), default=PURPOSE_SALES_LEADS)  # ventas_leads / vacantes
     location_label = db.Column(db.String(120))                 # Houston/Dallas/Pachuca...
 
+    # Override visual del panel/objetivo (ecommerce/leads/mensajes) — selector del desglose.
+    client_type_override = db.Column(db.String(20))
+
     # --- Estado de relación (gestión) ---
     status = db.Column(db.String(40), default=STATUS_ACTIVO)   # activo/pausado/inactivo/baja/pendiente_de_clasificar
     is_active = db.Column(db.Boolean, default=True)

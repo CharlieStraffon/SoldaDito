@@ -1,0 +1,19 @@
+{% include 'accounts/_hero.html' %}
+{% include 'accounts/_kgrid.html' %}
+{% include 'accounts/_ai.html' %}
+{% if d.quality %}
+<div class="block">
+  <h3>Calidad del lead</h3><div class="sub">Cuántos de los {{ d.quality.total }} leads se volvieron cliente (captura manual)</div>
+  <div class="qbar-wrap">
+    <div class="qbar"><div class="qual" style="width:{{ d.quality.pct }}%">{{ d.quality.qualified }} calificados</div></div>
+    <div class="qbar-meta"><span>{{ d.quality.qualified }} se volvieron cliente · captura manual</span><span>{{ d.quality.unqualified }} sin calificar</span></div>
+  </div>
+</div>
+{% else %}
+<div class="block">
+  <h3>Calidad del lead</h3>
+  <div class="sub">La calificación de leads (cuántos se volvieron cliente) se captura manualmente en el Desglose mensual. Aún no hay captura para este mes.</div>
+</div>
+{% endif %}
+{% include 'accounts/_chart.html' %}
+{% include 'accounts/_campaigns.html' %}

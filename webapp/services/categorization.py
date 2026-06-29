@@ -6,6 +6,7 @@ conversion_category solo se usó como SUGERENCIA en el seed, jamás en runtime.
 """
 from ..constants import (
     CAPTURE_COST_LABEL,
+    CAPTURE_MESSAGES,
     CAPTURE_RESULT_LABEL,
     PANEL_ECOMMERCE,
     PANEL_LEADS,
@@ -26,6 +27,18 @@ def panel_of(account):
 
 def is_pending(account):
     return panel_of(account) is None
+
+
+def visual_type(account):
+    """Tipo visual del panel: ecommerce / mensajes / leads. Honra el override del desglose."""
+    ov = getattr(account, "client_type_override", None)
+    if ov in ("ecommerce", "leads", "mensajes"):
+        return ov
+    if panel_of(account) == PANEL_ECOMMERCE:
+        return "ecommerce"
+    if primary_capture(account) == CAPTURE_MESSAGES:
+        return "mensajes"
+    return "leads"
 
 
 def is_vacantes(account):

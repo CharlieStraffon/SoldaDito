@@ -51,8 +51,10 @@ def test_account_detail_renders(client, session):
     r = client.get(f"/accounts/{a.id}")
     assert r.status_code == 200
     body = r.get_data(as_text=True)
-    assert "conversación" in body          # etiqueta de resultado de leads/messages
-    assert "cierre manual" in body          # value_source manual_close
+    assert "Acme Meta" in body               # nombre de la cuenta
+    assert "detalle de cuenta" in body        # shell branded
+    assert "dito-control.css" in body         # sistema de marca
+    assert "análisis IA" in body              # bloque IA
 
 
 def test_detail_404(client):

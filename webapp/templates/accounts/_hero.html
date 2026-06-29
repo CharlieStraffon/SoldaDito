@@ -1,0 +1,15 @@
+<div class="hero">
+  <div class="hero-main">
+    <div class="heroL">{{ d.hero.label }}</div>
+    <div class="heroV {{ 'good' if d.hero.good else 'bad' }}">{{ d.hero.value }}</div>
+    <div class="ctx">
+      {% if d.hero.normal %}<div class="c"><div class="cl">tu normal</div><div class="cv">{{ d.hero.normal }}</div></div>{% endif %}
+      {% if d.hero.target %}<div class="c"><div class="cl">objetivo</div><div class="cv">{{ d.hero.target }}</div></div>{% endif %}
+      {% if d.hero.freq %}<div class="c"><div class="cl">frecuencia</div><div class="cv" style="{{ 'color:var(--crit)' if d.hero.freq_bad }}">{{ d.hero.freq }}</div></div>{% endif %}
+    </div>
+  </div>
+  <div class="verdict">
+    <span class="bigchip {{ 'good' if d.hero.verdict.good else 'bad' }}">{{ d.hero.verdict.text }}</span>
+    <span class="vtext">{{ d.hero.vtext }}</span>
+  </div>
+</div>

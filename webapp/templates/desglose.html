@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dito — desglose mensual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dito-control.css') }}">
+<script>(function(){try{var t=localStorage.getItem('dito-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body class="detail-page">
+  <div class="dtop">
+    <div class="dwrap">
+      <div class="logo">d<span class="dotless">ı<span class="tri"></span></span>to</div>
+      <span class="lbl">desglose mensual</span>
+      <a class="backlink" href="{{ url_for('dashboard.index', slug=(d.back_slug if d else 'google')) }}">← volver al centro de control</a>
+      <button class="themetoggle" type="button" onclick="toggleTheme()" title="Cambiar tema" style="margin-left:14px">
+        <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke-width="1.75"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke-width="1.75"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="dwrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+      <div class="feebanner" style="background:{{ 'var(--ok-bg)' if category=='success' else 'var(--warn-bg)' }};color:{{ 'var(--ok)' if category=='success' else 'var(--warn)' }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    {% if not d %}
+      <div class="empty">No hay cuentas clasificadas para {{ 'Google Ads' if platform == 'google_ads' else 'Facebook Ads' }} todavía.</div>
+    {% else %}
+    <div class="view-head">
+      <div class="vh-title"><h1>desglose mensual</h1>
+        <p>La rentabilidad real de cada cuenta, mes a mes. Edita cualquier celda gris (incluidos honorarios); las celdas calculadas se recalculan solas.</p></div>
+    </div>
+
+    <div class="seg desglose-tabs">
+      <a href="{{ url_for('history.index', platform='google_ads') }}" class="{{ 'active' if platform == 'google_ads' }}">
+        <span class="pdot pg"></span>Google Ads <span class="seg-count">{{ platform_counts.get('google_ads', 0) }}</span></a>
+      <a href="{{ url_for('history.index', platform='facebook_ads') }}" class="{{ 'active' if platform == 'facebook_ads' }}">
+        <span class="pdot pf"></span>Facebook Ads <span class="seg-count">{{ platform_counts.get('facebook_ads', 0) }}</span></a>
+    </div>
+
+    <div class="acct-select">
+      <select onchange="location.href='/desglose/'+this.value+'?platform={{ platform }}'">
+        {% for a in accounts %}
+        <option value="{{ a.id }}" {{ 'selected' if a.id == d.account.id }}>{{ a.name }} — {{ d.client_type if a.id == d.account.id else '' }}</option>
+        {% endfor %}
+      </select>
+
+      <form method="post" action="{{ url_for('history.set_type', account_id=d.account.id) }}" style="display:inline">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <label class="objlabel">objetivo
+          <select name="client_type" onchange="this.form.submit()">
+            <option value="">automático</option>
+            {% for t in valid_types %}
+            <option value="{{ t }}" {{ 'selected' if d.account.client_type_override == t }}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </form>
+
+      <form method="post" action="{{ url_for('history.close_history', account_id=d.account.id) }}" style="display:inline"
+            onsubmit="return confirm('Cerrar y congelar todos los meses completos del histórico. Alimenta tu referencia (tu normal). ¿Continuar?');">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn btn-primary" type="submit">Cerrar histórico</button>
+      </form>
+    </div>
+
+    <div class="feebanner">
+      <svg viewBox="0 0 24 24" stroke-width="1.75"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>{{ d.fee_note }}</span>
+    </div>
+
+    <div class="dsummary">
+      {% for s in d.summary %}
+      <div class="dsum"><div class="l">{{ s.l }}</div><div class="v {{ 'good' if s.good }}">{{ s.v }}</div><div class="s">{{ s.s }}</div></div>
+      {% endfor %}
+    </div>
+
+    <div class="legend">
+      <span class="it"><span class="sw api"></span>editable · dato de la API</span>
+      <span class="it"><span class="sw man"></span>editable · captura del equipo</span>
+      <span class="it"><span class="sw calc"></span>calculado (solo lectura)</span>
+    </div>
+
+    <div class="tablewrap tabscroll">
+      <table class="dtable editable" data-ctype="{{ d.client_type }}" data-margin="{{ d.margin }}"
+             data-cell-url="{{ url_for('history.cell', account_id=d.account.id) }}">
+        <thead><tr>
+          {% for col in d.cols %}
+          <th class="{{ 'num' if col.kind not in ('mes','st') }} {{ 'man' if col.src == 'man' }}">{{ col.label }}{% if col.src %}<span class="src {{ col.src }}">{{ 'API' if col.src == 'api' else 'manual' }}</span>{% endif %}</th>
+          {% endfor %}
+        </tr></thead>
+        <tbody>
+          {% for row in d.rows %}
+          <tr data-year="{{ row.year }}" data-month="{{ row.month }}">
+            {% for cell in row.cells %}
+              {% if cell.kind == 'mes' %}
+              <td class="mescell">{{ cell.text }}</td>
+              {% elif cell.kind == 'st' %}
+              <td>{% if row.is_closed %}<span class="mstatus closed">cerrado</span>{% else %}<span class="mstatus open">en curso</span>
+                <form method="post" action="{{ url_for('history.close_month', account_id=d.account.id) }}" style="display:inline;margin-left:6px">
+                  <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><input type="hidden" name="year" value="{{ row.year }}"><input type="hidden" name="month" value="{{ row.month }}">
+                  <button class="closebtn" type="submit">Cerrar mes</button>
+                </form>{% endif %}</td>
+              {% elif cell.edit %}
+              <td class="num cell-edit {{ 'man' if cell.src == 'man' }}">
+                <input class="cellinput" type="number" inputmode="decimal" step="any" min="0"
+                       data-field="{{ cell.field }}" value="{{ cell.raw }}" aria-label="{{ cell.label }}">
+              </td>
+              {% elif cell.kind == 'calc_pct' %}
+              <td class="num"><span class="calc" data-key="{{ cell.key }}" data-kind="roi">{{ cell.fmt }}</span></td>
+              {% else %}
+              <td class="num"><span class="calc" data-key="{{ cell.key }}" data-kind="{{ 'x' if cell.kind == 'calc_x' else 'money' }}">{{ cell.fmt }}</span></td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          {% else %}
+          <tr><td colspan="{{ d.cols|length }}" style="color:var(--ink-5)">Aún no hay meses con datos para esta cuenta.</td></tr>
+          {% endfor %}
+          {% if d.ref %}
+          <tr class="refrow">
+            {% for col in d.cols %}
+              {% if col.kind == 'mes' %}<td class="reflabel">{{ d.ref.mes }}</td>
+              {% elif col.kind == 'st' %}<td></td>
+              {% else %}<td class="num">{{ d.ref[col.key] }}</td>{% endif %}
+            {% endfor %}
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+    <div class="savehint" id="saveHint"></div>
+    {% endif %}
+  </div>
+
+<script>
+function toggleTheme(){var c=document.documentElement.getAttribute('data-theme')==='dark'?'':'dark';if(c){document.documentElement.setAttribute('data-theme','dark');}else{document.documentElement.removeAttribute('data-theme');}try{localStorage.setItem('dito-theme',c);}catch(e){}}
+</script>
+{% if d %}
+<script>
+(function(){
+  var table = document.querySelector('table.dtable.editable');
+  if(!table) return;
+  var CT = table.dataset.ctype;
+  var MARGIN = parseFloat(table.dataset.margin) || 0.35;
+  var CELL_URL = table.dataset.cellUrl;
+  var CSRF = "{{ csrf_token() }}";
+  var hint = document.getElementById('saveHint');
+
+  function num(v){ v = (v===null||v===undefined)?'':String(v).trim(); return v===''?null:parseFloat(v); }
+  function fmtMoney(v){ return (v===null||isNaN(v))?'—':'$'+Math.round(v).toLocaleString(); }
+  function fmtX(v){ return v?(v.toFixed(1)+'x'):'—'; }
+  function fmtRoi(v){ return (v===null||isNaN(v))?'n/a':(v.toFixed(1)+'x'); }   // ROI canónico = ratio
+
+  function rowInputs(tr){
+    var o = {};
+    tr.querySelectorAll('input.cellinput').forEach(function(i){ o[i.dataset.field] = num(i.value); });
+    return o;
+  }
+
+  // Recompute en vivo — espeja el motor canónico (D1): roi = (monto×margen)/(inv+fee).
+  function recompute(tr){
+    var i = rowInputs(tr);
+    var inv = i.inversion || 0, fee = i.fee || 0, total = inv + fee;
+    var monto = i.monto_venta, calc = {};
+    if(CT === 'ecommerce'){
+      calc.aov  = i.ventas ? (monto||0) / i.ventas : null;
+      calc.cpa  = i.ventas ? inv / i.ventas : null;
+      calc.roas = inv ? (monto||0) / inv : null;
+      calc.roi  = (monto && total) ? (monto * MARGIN) / total : null;
+    } else if(CT === 'leads'){
+      calc.cpl = i.prospectos ? inv / i.prospectos : null;
+      calc.roi = (monto && total) ? (monto * MARGIN) / total : null;
+    } else {
+      calc.cpm = i.prospectos ? inv / i.prospectos : null;
+      calc.roi = null;
+    }
+    tr.querySelectorAll('span.calc[data-key]').forEach(function(sp){
+      var k = sp.dataset.key; if(!(k in calc)) return;
+      var v = calc[k], kind = sp.dataset.kind;
+      if(kind === 'roi'){ sp.textContent = fmtRoi(v); sp.className = 'calc ' + (v===null||isNaN(v) ? '' : (v >= 1 ? 'roi-pos' : 'roi-neg')); }
+      else if(kind === 'x'){ sp.textContent = fmtX(v); }
+      else { sp.textContent = fmtMoney(v); }
+    });
+  }
+
+  function showHint(text, ok){
+    hint.textContent = text; hint.className = 'savehint show ' + (ok ? 'ok' : 'err');
+    clearTimeout(showHint._t); showHint._t = setTimeout(function(){ hint.className = 'savehint'; }, 1800);
+  }
+
+  function save(input){
+    var tr = input.closest('tr');
+    var body = new URLSearchParams();
+    body.set('_csrf', CSRF); body.set('year', tr.dataset.year); body.set('month', tr.dataset.month);
+    body.set('field', input.dataset.field); body.set('value', input.value.trim());
+    input.classList.add('saving');
+    fetch(CELL_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:body})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        input.classList.remove('saving');
+        if(!d.ok){ input.classList.add('err'); showHint(d.error || 'Error al guardar', false); return; }
+        input.classList.remove('err'); input.classList.add('saved');
+        setTimeout(function(){ input.classList.remove('saved'); }, 900);
+        tr.querySelectorAll('span.calc[data-key]').forEach(function(sp){
+          var k = sp.dataset.key;
+          if(d.calc && (k in d.calc)){
+            sp.textContent = d.calc[k];
+            if(sp.dataset.kind === 'roi'){ sp.className = 'calc ' + (d.roi_pos ? 'roi-pos' : (d.roi_neg ? 'roi-neg' : '')); }
+          }
+        });
+        showHint('Guardado', true);
+      })
+      .catch(function(){ input.classList.remove('saving'); input.classList.add('err'); showHint('Error de red', false); });
+  }
+
+  table.querySelectorAll('input.cellinput').forEach(function(input){
+    input.addEventListener('input', function(){ recompute(input.closest('tr')); });
+    input.addEventListener('change', function(){ save(input); });
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); input.blur(); } });
+  });
+})();
+</script>
+{% endif %}
+</body>
+</html>
