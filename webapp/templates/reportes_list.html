@@ -1,18 +1,34 @@
-{% extends "base.html" %}
-{% block title %}Reportes{% endblock %}
+{% extends "brand_base.html" %}
+{% block title %}reportes{% endblock %}
+{% block page_label %}generar reporte{% endblock %}
+{% block back_href %}{{ url_for('tools.index') }}{% endblock %}
+{% block back_label %}herramientas{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h4 mb-0">Reportes a cliente</h1>
-  {% include "partials/month_selector.html" %}
+<div class="view-head">
+  <div class="vh-title"><h1>generar reporte</h1>
+    <p>Reporte por engagement (cliente × plataforma) y período, con datos de la API y los manuales del desglose.</p></div>
+  <div class="acct-select">
+    <form method="get">
+      <select name="month" onchange="this.form.submit()">
+        {% set names = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'] %}
+        {% for m in range(1,13) %}<option value="{{ m }}" {{ 'selected' if m==month }}>{{ names[m] }}</option>{% endfor %}
+      </select>
+      <select name="year" onchange="this.form.submit()">
+        {% for y in [2025, 2026] %}<option value="{{ y }}" {{ 'selected' if y==year }}>{{ y }}</option>{% endfor %}
+      </select>
+    </form>
+  </div>
 </div>
-<div class="row row-cols-1 row-cols-md-3 g-3">
-{% for it in items %}
-  <div class="col"><div class="card h-100"><div class="card-body">
-    <h2 class="h6">{{ it.client.name }}</h2>
-    <span class="badge text-bg-dark">{{ platform_labels[it.platform] }}</span>
-    <span class="small text-muted">{{ it.n }} cuenta(s)</span>
-    <div class="mt-2"><a class="btn btn-sm btn-primary" href="{{ url_for('reports.report', client_slug=it.client.slug, platform=it.platform, year=year, month=month) }}">Ver reporte</a></div>
-  </div></div></div>
-{% endfor %}
+
+<div class="tools">
+  {% for it in items %}
+  <a class="tool" href="{{ url_for('reports.report', client_slug=it.client.slug, platform=it.platform, year=year, month=month) }}">
+    <h3>{{ it.client.name }}</h3>
+    <p><span class="cstatus activa">{{ platform_labels[it.platform] }}</span> · {{ it.n }} cuenta(s)</p>
+    <span class="go">Ver reporte →</span>
+  </a>
+  {% else %}
+  <div class="empty">Sin engagements activos.</div>
+  {% endfor %}
 </div>
 {% endblock %}

@@ -1,0 +1,21 @@
+{% extends "brand_base.html" %}
+{% block title %}revisión de creativos{% endblock %}
+{% block page_label %}revisión de creativos{% endblock %}
+{% block back_href %}{{ url_for('tools.index') }}{% endblock %}
+{% block back_label %}herramientas{% endblock %}
+{% block content %}
+<div class="view-head"><div class="vh-title">
+  <h1>revisión de creativos</h1>
+  <p>Sube imágenes o videos y obtén un análisis IA por rúbrica con veredicto automático.</p>
+</div></div>
+
+<div class="rev-filters">
+  <select disabled><option>Todos los clientes</option></select>
+  <select disabled><option>Todos los estados</option></select>
+  <select disabled><option>Todas las plataformas</option></select>
+</div>
+
+<div class="empty">
+  No hay creativos aún. <span style="color:var(--ink-4)">La revisión IA por rúbrica (Haiku visión) se conecta en una fase posterior.</span>
+</div>
+{% endblock %}

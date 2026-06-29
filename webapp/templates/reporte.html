@@ -1,64 +1,61 @@
-{% extends "base.html" %}
+{% extends "brand_base.html" %}
 {% set names = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'] %}
-{% block title %}Reporte · {{ client.name }}{% endblock %}
+{% block title %}reporte · {{ client.name }}{% endblock %}
+{% block page_label %}reporte a cliente{% endblock %}
+{% block back_href %}{{ url_for('reports.index', year=year, month=month) }}{% endblock %}
+{% block back_label %}reportes{% endblock %}
 {% macro yoy(cur_v, other_v) %}
   {% if other_v not in (none, 0) and cur_v is not none %}
-    {% set d = (cur_v - other_v)/other_v*100 %}
-    <span class="{{ 'delta-down' if d>=0 else 'delta-up' }}">{{ '%+.0f%%' % d }}</span>
-  {% else %}<span class="text-muted">—</span>{% endif %}
+    {% set dd = (cur_v - other_v)/other_v*100 %}
+    <span class="chip {{ 'down-good' if dd>=0 else 'up-bad' }}">{{ '%+.0f%%' % dd }}</span>
+  {% else %}<span class="muted">—</span>{% endif %}
 {% endmacro %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-  <h1 class="h4 mb-0">{{ client.name }} · {{ platform_labels[platform] }}
-    <span class="text-muted fs-6">{{ names[month] }} {{ year }}</span></h1>
-  <div class="d-flex gap-2">
-    {% include "partials/month_selector.html" %}
-    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('reports.index', year=year, month=month) }}">← Reportes</a>
-  </div>
+<div class="ahead">
+  <div><h1>{{ client.name }}</h1>
+    <div class="meta">{{ platform_labels[platform] }} · {{ names[month] }} {{ year }}</div></div>
 </div>
 
 {% if cur %}
-<div class="card mb-3"><div class="card-body">
-  <div class="d-flex justify-content-between align-items-start">
-    <div><h2 class="h5 mb-1">{{ headline }}</h2>
-      <p class="text-muted mb-0">{{ narrative or "" }}</p></div>
-    {% if not narrative %}
-    <a class="btn btn-sm btn-outline-dark" href="?year={{ year }}&month={{ month }}&narrative=1">Generar narrativa (Sonnet)</a>
-    {% endif %}
-  </div>
-</div></div>
+<div class="ai-block">
+  <div class="h"><span class="tri"></span><span>resumen</span></div>
+  <p>{{ narrative or headline }}</p>
+  {% if not narrative %}<div style="margin-top:10px"><a class="btn btn-primary" href="?year={{ year }}&month={{ month }}&narrative=1">Generar narrativa (Sonnet)</a></div>{% endif %}
+</div>
 
-<div class="table-responsive"><table class="table table-sm align-middle">
-  <thead class="table-light"><tr><th>Métrica</th><th class="text-end">Este mes</th><th class="text-end">vs mes pasado</th><th class="text-end">vs año pasado (YoY)</th></tr></thead>
-  <tbody>
-    <tr><td>Inversión</td><td class="text-end metric-num">{{ cur.sum_inversion|money(cur.currency) }}</td>
-      <td class="text-end">{{ yoy(cur.sum_inversion, mom.sum_inversion if mom else none) }}</td>
-      <td class="text-end">{{ yoy(cur.sum_inversion, yoy_data.sum_inversion if yoy_data else none) }}</td></tr>
-    <tr><td>Ventas</td><td class="text-end metric-num">{{ cur.sum_ventas|num }}</td>
-      <td class="text-end">{{ yoy(cur.sum_ventas, mom.sum_ventas if mom else none) }}</td>
-      <td class="text-end">{{ yoy(cur.sum_ventas, yoy_data.sum_ventas if yoy_data else none) }}</td></tr>
-    <tr><td>Monto de venta</td><td class="text-end metric-num">{{ cur.sum_monto|money }}</td>
-      <td class="text-end">{{ yoy(cur.sum_monto, mom.sum_monto if mom else none) }}</td>
-      <td class="text-end">{{ yoy(cur.sum_monto, yoy_data.sum_monto if yoy_data else none) }}</td></tr>
-    <tr><td>ROI (canónico)</td><td class="text-end metric-num">{{ cur.roi|ratio if cur.roi is not none else '—' }}</td>
-      <td class="text-end">{{ yoy(cur.roi, mom.roi if mom else none) }}</td>
-      <td class="text-end">{{ yoy(cur.roi, yoy_data.roi if yoy_data else none) }}</td></tr>
-    <tr><td>Utilidad neta</td><td class="text-end metric-num">{{ cur.utilidad_neta|money }}</td>
-      <td class="text-end">{{ yoy(cur.utilidad_neta, mom.utilidad_neta if mom else none) }}</td>
-      <td class="text-end">{{ yoy(cur.utilidad_neta, yoy_data.utilidad_neta if yoy_data else none) }}</td></tr>
-  </tbody>
-</table></div>
+<div class="tablewrap" style="margin-bottom:18px">
+  <table>
+    <thead><tr><th>Métrica</th><th class="num">Este mes</th><th class="num">vs mes pasado</th><th class="num">vs año pasado</th></tr></thead>
+    <tbody>
+      <tr><td>Inversión</td><td class="num">${{ '{:,.0f}'.format(cur.sum_inversion) }}</td>
+        <td class="num">{{ yoy(cur.sum_inversion, mom.sum_inversion if mom else none) }}</td>
+        <td class="num">{{ yoy(cur.sum_inversion, yoy_data.sum_inversion if yoy_data else none) }}</td></tr>
+      <tr><td>Ventas</td><td class="num">{{ '{:,.0f}'.format(cur.sum_ventas) }}</td>
+        <td class="num">{{ yoy(cur.sum_ventas, mom.sum_ventas if mom else none) }}</td>
+        <td class="num">{{ yoy(cur.sum_ventas, yoy_data.sum_ventas if yoy_data else none) }}</td></tr>
+      <tr><td>Monto de venta</td><td class="num">${{ '{:,.0f}'.format(cur.sum_monto) }}</td>
+        <td class="num">{{ yoy(cur.sum_monto, mom.sum_monto if mom else none) }}</td>
+        <td class="num">{{ yoy(cur.sum_monto, yoy_data.sum_monto if yoy_data else none) }}</td></tr>
+      <tr><td>ROI (canónico)</td><td class="num">{{ ('%.1fx' % cur.roi) if cur.roi is not none else '—' }}</td>
+        <td class="num">{{ yoy(cur.roi, mom.roi if mom else none) }}</td>
+        <td class="num">{{ yoy(cur.roi, yoy_data.roi if yoy_data else none) }}</td></tr>
+      <tr><td>Utilidad neta</td><td class="num">${{ '{:,.0f}'.format(cur.utilidad_neta) }}</td>
+        <td class="num">{{ yoy(cur.utilidad_neta, mom.utilidad_neta if mom else none) }}</td>
+        <td class="num">{{ yoy(cur.utilidad_neta, yoy_data.utilidad_neta if yoy_data else none) }}</td></tr>
+    </tbody>
+  </table>
+</div>
 
-<div class="card"><div class="card-header"><strong>Cuentas del engagement</strong></div>
-<ul class="list-group list-group-flush">
-{% for r in rows %}
-  <li class="list-group-item d-flex justify-content-between">
-    <span>{{ r.account.name }}{% if r.account.location_label %} · {{ r.account.location_label }}{% endif %}</span>
-    <span class="metric-num">{{ (r.mh.inversion if r.mh else 0)|money(cur.currency) }} inv · {{ (r.mh.monto_venta if r.mh else 0)|money }} venta</span>
-  </li>
-{% endfor %}
-</ul></div>
+<div class="block"><h3>Cuentas del engagement</h3>
+  <table class="camp-table"><tbody>
+  {% for r in rows %}
+    <tr><td><div class="camp-name">{{ r.account.name }}{% if r.account.location_label %} · {{ r.account.location_label }}{% endif %}</div></td>
+      <td class="num">${{ '{:,.0f}'.format(r.mh.inversion if r.mh else 0) }} inv</td>
+      <td class="num">${{ '{:,.0f}'.format(r.mh.monto_venta if r.mh and r.mh.monto_venta else 0) }} venta</td></tr>
+  {% endfor %}
+  </tbody></table>
+</div>
 {% else %}
-<div class="alert alert-secondary">Sin datos para {{ names[month] }} {{ year }}.</div>
+<div class="empty">Sin datos para {{ names[month] }} {{ year }}.</div>
 {% endif %}
 {% endblock %}

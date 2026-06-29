@@ -1,86 +1,67 @@
-{% extends "base.html" %}
-{% block title %}Administración{% endblock %}
+{% extends "brand_base.html" %}
+{% block title %}datos del cliente{% endblock %}
+{% block page_label %}datos del cliente · administración{% endblock %}
 {% block content %}
-<h1 class="h4 mb-3">Administración</h1>
-<p class="small text-muted">Los datos ya eran editables por seed/código; aquí la UI (D6). Las ediciones se marcan manual y no se pisan en re-seed.</p>
+<div class="view-head"><div class="vh-title">
+  <h1>datos del cliente</h1>
+  <p>Los datos ya eran editables por seed/código (D6); aquí la UI. Las ediciones se marcan manual y no se pisan en re-seed.</p>
+</div></div>
 
-<ul class="nav nav-tabs mb-3" role="tablist">
-  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-pend">Pendientes ({{ pending|length }})</button></li>
-  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-margin">Márgenes</button></li>
-  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-targets">Objetivos / fees</button></li>
-</ul>
+{# ── Pendientes de clasificar ── #}
+<div class="block">
+  <h3>Pendientes de clasificar</h3><div class="sub">Cuentas conectadas sin mapeo en la matriz. Nunca se les asume un tipo.</div>
+  {% for a in pending %}
+  <div class="acct-spec">
+    <div class="ahn">{{ a.name }} <span class="plat">{{ platform_labels[a.platform] }} · {{ a.currency }}</span></div>
+    <form method="post" action="{{ url_for('admin.classify', account_id=a.id) }}" class="form-grid">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <div class="field"><label>Cliente</label>
+        <select name="client_id"><option value="">—</option>
+          {% for c in clients %}<option value="{{ c.id }}" {{ 'selected' if a.client_id==c.id }}>{{ c.name }}</option>{% endfor %}
+        </select></div>
+      <div class="field"><label>Panel</label>
+        <select name="panel_type"><option value="">—</option>{% for p in panel_types %}<option value="{{ p }}">{{ p }}</option>{% endfor %}</select></div>
+      <div class="field"><label>Valor</label>
+        <select name="value_source"><option value="">—</option>{% for v in value_sources %}<option value="{{ v }}">{{ v }}</option>{% endfor %}</select></div>
+      <div class="field"><label>Captura primaria</label>
+        <select name="primary_capture"><option value="">—</option>{% for c in capture_methods %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select></div>
+      <div class="field"><label>Propósito</label>
+        <select name="purpose">{% for p in purposes %}<option value="{{ p }}">{{ p }}</option>{% endfor %}</select></div>
+      <div class="field" style="justify-content:flex-end"><button class="btn btn-primary" type="submit">Clasificar</button></div>
+    </form>
+  </div>
+  {% else %}<div class="sub">No hay cuentas pendientes. 🎉</div>{% endfor %}
+</div>
 
-<div class="tab-content">
-  {# --- Reclasificar pendientes --- #}
-  <div class="tab-pane fade show active" id="tab-pend">
-    {% for a in pending %}
-    <div class="card mb-2"><div class="card-body py-2">
-      <div class="fw-semibold mb-2">{{ a.name }} <span class="badge text-bg-dark">{{ platform_labels[a.platform] }}</span> <span class="text-muted small">{{ a.currency }}</span></div>
-      <form method="post" action="{{ url_for('admin.classify', account_id=a.id) }}" class="row g-2 align-items-end">
+{# ── Márgenes por cliente ── #}
+<div class="block">
+  <h3>Márgenes por cliente</h3><div class="sub">Editable; default 0.35. Alimenta el ROI canónico.</div>
+  <table class="camp-table"><thead><tr><th>Cliente</th><th class="num">Margen</th><th></th></tr></thead><tbody>
+    {% for c in clients %}
+    <tr><td>{{ c.name }}</td><td class="num">{{ '%.0f%%' % ((c.margin_pct or 0.35)*100) }}</td>
+      <td><form method="post" action="{{ url_for('admin.margin', client_id=c.id) }}" style="display:flex;gap:8px;justify-content:flex-end">
         <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-        <div class="col-md-2"><label class="form-label small mb-0">Cliente</label>
-          <select name="client_id" class="form-select form-select-sm">
-            <option value="">—</option>
-            {% for c in clients %}<option value="{{ c.id }}" {{ 'selected' if a.client_id==c.id }}>{{ c.name }}</option>{% endfor %}
-          </select></div>
-        <div class="col-md-2"><label class="form-label small mb-0">Panel</label>
-          <select name="panel_type" class="form-select form-select-sm">
-            <option value="">—</option>{% for p in panel_types %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-          </select></div>
-        <div class="col-md-2"><label class="form-label small mb-0">Valor</label>
-          <select name="value_source" class="form-select form-select-sm">
-            <option value="">—</option>{% for v in value_sources %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
-          </select></div>
-        <div class="col-md-2"><label class="form-label small mb-0">Captura primaria</label>
-          <select name="primary_capture" class="form-select form-select-sm">
-            <option value="">—</option>{% for c in capture_methods %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
-          </select></div>
-        <div class="col-md-2"><label class="form-label small mb-0">Propósito</label>
-          <select name="purpose" class="form-select form-select-sm">
-            {% for p in purposes %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-          </select></div>
-        <div class="col-md-2"><button class="btn btn-sm btn-primary w-100">Clasificar</button></div>
-      </form>
-    </div></div>
-    {% else %}<p class="text-muted">No hay cuentas pendientes. 🎉</p>{% endfor %}
-  </div>
+        <input class="cellinput" style="width:6rem;border:1px solid var(--ink-6)" type="number" step="0.01" min="0" max="1" name="margin_pct" value="{{ c.margin_pct or 0.35 }}">
+        <button class="closebtn" type="submit">Guardar</button></form></td></tr>
+    {% endfor %}
+  </tbody></table>
+</div>
 
-  {# --- Márgenes --- #}
-  <div class="tab-pane fade" id="tab-margin">
-    <div class="table-responsive"><table class="table table-sm align-middle">
-      <thead class="table-light"><tr><th>Cliente</th><th>Margen actual</th><th>Editar</th></tr></thead>
-      <tbody>
-      {% for c in clients %}
-      <tr><td>{{ c.name }}</td><td class="metric-num">{{ '%.0f%%' % ((c.margin_pct or 0.35)*100) }}</td>
-        <td><form method="post" action="{{ url_for('admin.margin', client_id=c.id) }}" class="d-flex gap-1">
-          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-          <input type="number" step="0.01" min="0" max="1" name="margin_pct" value="{{ c.margin_pct or 0.35 }}" class="form-control form-control-sm" style="width:6rem">
-          <button class="btn btn-sm btn-outline-primary">Guardar</button>
-        </form></td></tr>
-      {% endfor %}
-      </tbody>
-    </table></div>
-  </div>
-
-  {# --- Objetivos / fees --- #}
-  <div class="tab-pane fade" id="tab-targets">
-    <div class="table-responsive"><table class="table table-sm align-middle">
-      <thead class="table-light"><tr><th>Cuenta</th><th>CPA obj.</th><th>ROAS obj.</th><th>Presupuesto</th><th>Fee</th><th></th></tr></thead>
-      <tbody>
-      {% for a in accounts if not a.panel_type is none %}
-      <tr><td class="small">{{ a.name }} <span class="badge text-bg-light">{{ platform_labels[a.platform] }}</span></td>
-        <form method="post" action="{{ url_for('admin.targets', account_id=a.id) }}">
-          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-          <td><input name="target_cpa" value="{{ a.target_cpa or '' }}" class="form-control form-control-sm" style="width:6rem"></td>
-          <td><input name="target_roas" value="{{ a.target_roas or '' }}" class="form-control form-control-sm" style="width:6rem"></td>
-          <td><input name="monthly_budget" value="{{ a.monthly_budget or '' }}" class="form-control form-control-sm" style="width:7rem"></td>
-          <td><input name="monthly_fee" value="{{ a.monthly_fee or '' }}" class="form-control form-control-sm" style="width:7rem"></td>
-          <td><button class="btn btn-sm btn-outline-primary">Guardar</button></td>
-        </form>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table></div>
-  </div>
+{# ── Objetivos / fees por cuenta ── #}
+<div class="block">
+  <h3>Objetivos y honorarios por cuenta</h3>
+  <table class="camp-table"><thead><tr><th>Cuenta</th><th class="num">CPA obj.</th><th class="num">ROAS obj.</th><th class="num">Presupuesto</th><th class="num">Fee</th><th></th></tr></thead><tbody>
+    {% for a in accounts if a.panel_type %}
+    <tr><td>{{ a.name }} <span class="cstatus activa">{{ platform_labels[a.platform] }}</span></td>
+      <form method="post" action="{{ url_for('admin.targets', account_id=a.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <td class="num"><input class="cellinput" style="width:6rem;border:1px solid var(--ink-6)" name="target_cpa" value="{{ a.target_cpa or '' }}"></td>
+        <td class="num"><input class="cellinput" style="width:5rem;border:1px solid var(--ink-6)" name="target_roas" value="{{ a.target_roas or '' }}"></td>
+        <td class="num"><input class="cellinput" style="width:7rem;border:1px solid var(--ink-6)" name="monthly_budget" value="{{ a.monthly_budget or '' }}"></td>
+        <td class="num"><input class="cellinput" style="width:7rem;border:1px solid var(--ink-6)" name="monthly_fee" value="{{ a.monthly_fee or '' }}"></td>
+        <td><button class="closebtn" type="submit">Guardar</button></td>
+      </form></tr>
+    {% endfor %}
+  </tbody></table>
 </div>
 {% endblock %}

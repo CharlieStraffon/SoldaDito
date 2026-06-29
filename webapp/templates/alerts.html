@@ -1,55 +1,51 @@
-{% extends "base.html" %}
-{% block title %}Alertas{% endblock %}
-
-{% macro alert_card(a) %}
-<div class="card mb-2 sev-{{ a.severity }}">
-  <div class="card-body py-2">
-    <div class="d-flex justify-content-between align-items-start gap-2">
-      <div>
-        <a href="{{ url_for('accounts.detail', account_id=a.account_id) }}" class="fw-semibold text-decoration-none">
-          {{ a.account.name }}</a>
-        <span class="badge text-bg-dark">{{ platform_labels[a.platform] }}</span>
-        <span class="badge text-bg-light">{{ a.kind }}</span>
-        {% if a.pushed %}<span class="badge text-bg-danger">empujada</span>{% endif %}
-        <span class="badge text-bg-secondary">{{ a.status }}</span>
-        <div class="small mt-1">{{ a.ai_explanation or a.message }}</div>
-        {% if a.delta_pct is not none %}<div class="small text-muted">Δ {{ a.delta_pct|signed_pct }} vs normal · {{ a.days_sustained }}d · ruteo: {{ a.routed_to.name if a.routed_to else '—' }}</div>{% endif %}
-      </div>
-      <form method="post" class="d-flex gap-1" action="">
-        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-        <button class="btn btn-sm btn-outline-secondary" formaction="{{ url_for('alerts.update', alert_id=a.id, action='explain') }}">¿Por qué?</button>
-        {% if a.status != 'acknowledged' %}<button class="btn btn-sm btn-outline-primary" formaction="{{ url_for('alerts.update', alert_id=a.id, action='ack') }}">Reconocer</button>{% endif %}
-        {% if a.status != 'resolved' %}<button class="btn btn-sm btn-outline-success" formaction="{{ url_for('alerts.update', alert_id=a.id, action='resolve') }}">Resolver</button>{% endif %}
-      </form>
-    </div>
-  </div>
-</div>
-{% endmacro %}
-
+{% extends "brand_base.html" %}
+{% block title %}alertas{% endblock %}
+{% block page_label %}alertas · ruteo por persona{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-  <h1 class="h4 mb-0">Alertas</h1>
-  <div class="d-flex gap-2 align-items-center">
-    <div class="btn-group btn-group-sm">
-      <a class="btn {{ 'btn-primary' if status=='active' else 'btn-outline-secondary' }}" href="?status=active">Activas</a>
-      <a class="btn {{ 'btn-primary' if status=='resolved' else 'btn-outline-secondary' }}" href="?status=resolved">Resueltas</a>
+<div class="view-head">
+  <div class="vh-title"><h1>alertas</h1>
+    <p>Día 1: solo críticas se empujan. Rendimiento y positivas se calculan y se muestran calladas.</p></div>
+  <div class="acct-select">
+    <div class="seg">
+      <a href="?status=active" class="{{ 'active' if status=='active' }}">Activas</a>
+      <a href="?status=resolved" class="{{ 'active' if status=='resolved' }}">Resueltas</a>
     </div>
-    <div class="btn-group btn-group-sm">
-      <a class="btn {{ 'btn-dark' if not member else 'btn-outline-secondary' }}" href="?status={{ status }}">Todos</a>
-      {% for m in members %}
-      <a class="btn {{ 'btn-dark' if member==m.slug else 'btn-outline-secondary' }}" href="?status={{ status }}&member={{ m.slug }}">{{ m.name }}</a>
-      {% endfor %}
+    <div class="seg">
+      <a href="?status={{ status }}" class="{{ 'active' if not member }}">Todos</a>
+      {% for m in members %}<a href="?status={{ status }}&member={{ m.slug }}" class="{{ 'active' if member==m.slug }}">{{ m.name }}</a>{% endfor %}
     </div>
     <form method="post" action="{{ url_for('alerts.run') }}">
       <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-      <button class="btn btn-sm btn-success" type="submit">Correr detección</button>
+      <button class="btn btn-primary" type="submit">Correr detección</button>
     </form>
   </div>
 </div>
-<p class="small text-muted">Día 1: solo críticas se empujan. Rendimiento y positivas se calculan, se muestran calladas.</p>
 
 {% for sev in ['critico','rendimiento','positivo'] %}
-<h2 class="h6 mt-3">{{ sev_labels[sev] }} <span class="badge text-bg-light">{{ buckets[sev]|length }}</span></h2>
-{% for a in buckets[sev] %}{{ alert_card(a) }}{% else %}<p class="small text-muted">Ninguna.</p>{% endfor %}
+{% set cls = 'crit' if sev=='critico' else ('pos' if sev=='positivo' else 'warn') %}
+<div class="sec-title" style="margin-top:8px"><h2>{{ sev_labels[sev] }}</h2><span class="note">{{ buckets[sev]|length }}</span></div>
+<div class="anoms" style="grid-template-columns:repeat(auto-fill,minmax(340px,1fr))">
+  {% for a in buckets[sev] %}
+  <div class="anom {{ cls }}">
+    <div class="bar"></div>
+    <div class="body">
+      <div class="row1"><span class="sev">{{ a.kind.replace('_',' ') }}</span><span class="acct">{{ a.account.name }}</span></div>
+      <h3>{{ a.message or a.kind }}</h3>
+      <p>{{ a.ai_explanation or '' }}
+        {% if a.delta_pct is not none %}<br>Δ {{ a.delta_pct|signed_pct }} vs normal · {{ a.days_sustained }}d · ruteo: {{ a.routed_to.name if a.routed_to else '—' }}{% endif %}</p>
+      <div class="ai">
+        {% if a.pushed %}<span class="sev" style="background:var(--crit-bg);color:var(--crit)">empujada</span>{% endif %}
+        <span class="sev" style="background:var(--ink-7);color:var(--ink-4)">{{ a.status }}</span>
+        <form method="post" class="ai" style="margin-left:auto;gap:8px;border:none;padding:0;margin-top:0">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="why" formaction="{{ url_for('alerts.update', alert_id=a.id, action='explain') }}" type="submit">¿por qué?</button>
+          {% if a.status != 'acknowledged' %}<button class="why" formaction="{{ url_for('alerts.update', alert_id=a.id, action='ack') }}" type="submit">reconocer</button>{% endif %}
+          {% if a.status != 'resolved' %}<button class="why" formaction="{{ url_for('alerts.update', alert_id=a.id, action='resolve') }}" type="submit">resolver</button>{% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}<div class="sub" style="color:var(--ink-5)">Ninguna.</div>{% endfor %}
+</div>
 {% endfor %}
 {% endblock %}

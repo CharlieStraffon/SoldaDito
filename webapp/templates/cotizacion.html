@@ -1,0 +1,67 @@
+{% extends "brand_base.html" %}
+{% block title %}cotización{% endblock %}
+{% block page_label %}comercial · cotización{% endblock %}
+{% block back_href %}{{ url_for('tools.index') }}{% endblock %}
+{% block back_label %}herramientas{% endblock %}
+{% block content %}
+<div class="view-head"><div class="vh-title">
+  <h1>cotización</h1>
+  <p>El marco calcula presupuesto y honorario y marca si el CPA esperado es rentable. Tú validas.</p>
+</div></div>
+
+<form method="post" class="formcard">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="form-sec">
+    <h3>Nueva cotización</h3>
+    <div class="form-grid">
+      <div class="field"><label>Cliente *</label>
+        <select name="client_id" required>
+          <option value="">— Cliente —</option>
+          {% for c in clients %}<option value="{{ c.id }}" {{ 'selected' if form.get('client_id')==c.id|string }}>{{ c.name }}</option>{% endfor %}
+        </select></div>
+      <div class="field"><label>Objetivo de conversiones *</label>
+        <input name="objetivo" type="number" step="any" min="0" required value="{{ form.get('objetivo','') }}"></div>
+      <div class="field"><label>CPA esperado (opcional)</label>
+        <input name="cpa" type="number" step="any" min="0" placeholder="o derivar del baseline →" value="{{ form.get('cpa','') }}"></div>
+      <div class="field"><label>Cuenta (para CPA del baseline)</label>
+        <select name="baseline_account_id">
+          <option value="">— Ninguna —</option>
+          {% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if form.get('baseline_account_id')==a.id|string }}>{{ a.name }}</option>{% endfor %}
+        </select></div>
+      <div class="field"><label>Margen por venta (opcional)</label>
+        <input name="margin" type="number" step="0.01" min="0" max="1" placeholder="default: del cliente" value="{{ form.get('margin','') }}"></div>
+      <div class="field"><label>Ticket promedio (opcional)</label>
+        <input name="ticket" type="number" step="any" min="0" placeholder="valor por venta" value="{{ form.get('ticket','') }}"></div>
+      <div class="field"><label>Honorarios (opcional)</label>
+        <input name="honorarios" type="number" step="any" min="0" placeholder="default: del cliente" value="{{ form.get('honorarios','') }}"></div>
+    </div>
+    <div class="field hint" style="margin-top:8px">Si no capturas el CPA esperado, elige una cuenta con histórico cerrado y se deriva de su "tu normal".</div>
+    <div class="form-foot"><button class="btn btn-primary" type="submit">Calcular cotización</button></div>
+  </div>
+</form>
+
+{% if result %}
+<div class="hero" style="margin-top:22px">
+  <div class="hero-main">
+    <div class="heroL">Presupuesto sugerido</div>
+    <div class="heroV">${{ '{:,.0f}'.format(result.presupuesto) }}</div>
+    <div class="ctx">
+      <div class="c"><div class="cl">honorarios</div><div class="cv">${{ '{:,.0f}'.format(result.honorarios) }}</div></div>
+      <div class="c"><div class="cl">costo total</div><div class="cv">${{ '{:,.0f}'.format(result.costo_total) }}</div></div>
+      <div class="c"><div class="cl">ingreso esperado</div><div class="cv">${{ '{:,.0f}'.format(result.ingreso) }}</div></div>
+      <div class="c"><div class="cl">margen</div><div class="cv">{{ (result.margin*100)|round(0)|int }}%</div></div>
+    </div>
+  </div>
+  <div class="verdict">
+    <span class="bigchip {{ 'good' if result.rentable else 'bad' }}">{{ 'rentable' if result.rentable else 'no rentable' }}</span>
+    <span class="vtext">ROI canónico {{ ('%.1fx' % result.roi) if result.roi is not none else '—' }} · utilidad estimada ${{ '{:,.0f}'.format(result.utilidad) }}</span>
+  </div>
+</div>
+<div class="kgrid">
+  <div class="k"><div class="l">CPA usado</div><div class="v">${{ '{:,.0f}'.format(result.cpa) }}</div></div>
+  <div class="k"><div class="l">Objetivo conversiones</div><div class="v">{{ '{:,.0f}'.format(result.objetivo) }}</div></div>
+  <div class="k"><div class="l">Ticket promedio</div><div class="v">${{ '{:,.0f}'.format(result.ticket) }}</div></div>
+  <div class="k"><div class="l">ROI</div><div class="v {{ 'bad' if not result.rentable }}">{{ ('%.1fx' % result.roi) if result.roi is not none else '—' }}</div></div>
+</div>
+{% endif %}
+{% endblock %}

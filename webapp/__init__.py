@@ -88,6 +88,7 @@ def _register_blueprints(app):
     from .routes.actions import actions_bp
     from .routes.admin import admin_bp
     from .routes.reports import reports_bp
+    from .routes.tools import tools_bp
 
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(accounts_bp)
@@ -96,3 +97,4 @@ def _register_blueprints(app):
     app.register_blueprint(actions_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(tools_bp)
