@@ -21,9 +21,14 @@ RUN mkdir -p instance && chmod +x docker-entrypoint.sh
 
 # La base SQLite vive en /app/instance — MONTAR un volumen persistente ahí.
 VOLUME ["/app/instance"]
+
+# Puerto interno por defecto. EasyPanel debe apuntar su proxy a ESTE puerto (8000).
+# Si EasyPanel inyecta $PORT, gunicorn_conf lo respeta automáticamente.
+ENV PORT=8000
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD curl -fsS http://127.0.0.1:8000/healthz || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=5 \
+    CMD curl -fsS "http://127.0.0.1:${PORT:-8000}/healthz" || exit 1
 
-CMD ["./docker-entrypoint.sh"]
+# Invocado con `sh` para evitar problemas de bit-ejecutable / fin de línea.
+CMD ["sh", "docker-entrypoint.sh"]
