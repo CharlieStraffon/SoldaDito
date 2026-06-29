@@ -29,7 +29,7 @@
     <div class="small text-muted mt-1">Capturas: {{ cat.captures|join(', ') }} (primaria: {{ cat.primary_capture }})</div>
     {% endif %}
   </div>
-  <a href="{{ url_for('dashboard.index') }}" class="btn btn-sm btn-outline-secondary">← Centro de control</a>
+  <a href="{{ url_for('dashboard.index', slug='google') }}" class="btn btn-sm btn-outline-secondary">← Centro de control</a>
 </div>
 
 {% if alerts %}

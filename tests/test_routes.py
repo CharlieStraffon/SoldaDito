@@ -29,14 +29,21 @@ def _seed_one(session):
     return a
 
 
-def test_dashboard_renders_with_data(client, session):
-    _seed_one(session)
+def test_root_redirects_to_branded_centro(client):
     r = client.get("/")
+    assert r.status_code == 302
+    assert "/google" in r.headers["Location"]
+
+
+def test_centro_renders_with_data(client, session):
+    _seed_one(session)
+    r = client.get("/facebook")
     assert r.status_code == 200
     body = r.get_data(as_text=True)
     assert "Acme" in body
-    assert "Meta Ads" in body
-    assert "Peor-primero" in body
+    assert "centro de control" in body          # branded shell
+    assert "todas las cuentas" in body          # worst-first table
+    assert "dito-control.css" in body           # brand system loaded
 
 
 def test_account_detail_renders(client, session):

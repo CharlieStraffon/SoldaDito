@@ -130,6 +130,7 @@ def account_row(account, cur_agg, prev_agg):
         "prev": prev,
         "hero_metric": hero_metric,
         "delta_pct": delta,
+        "adverse": adverse,
         "silent": silent,
         "concern": concern_score(account, cur, prev),
         "panel": panel,

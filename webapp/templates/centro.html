@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dito — centro de control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dito-control.css') }}">
+<script>(function(){try{var t=localStorage.getItem('dito-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+
+{# ── Sidebar ─────────────────────────────────────────────────────────── #}
+<aside class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="logo">d<span class="dotless">ı<span class="tri"></span></span>to</div>
+    <div class="sb-tagline">centro de control · cdmx</div>
+  </div>
+  <div class="sb-nav">
+    <a class="nav-item active" href="{{ url_for('dashboard.index', slug=b.slug) }}">
+      <svg class="ni" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Centro de control</a>
+    <a class="nav-item" href="{{ url_for('history.index') }}">
+      <svg class="ni" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-3"/></svg>Desglose mensual</a>
+    <a class="nav-item" href="{{ url_for('reports.index') }}">
+      <svg class="ni" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2 2.8-2.8z"/></svg>Herramientas</a>
+    <a class="nav-item" href="{{ url_for('admin.index') }}">
+      <svg class="ni" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Datos del cliente</a>
+  </div>
+  <div class="sb-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+    <input type="text" placeholder="Buscar cuenta…" id="search">
+  </div>
+  <div class="sb-section">Clientes</div>
+  <div class="sb-clients" id="clientList">
+    {% for g in sidebar_groups %}
+    <div class="cl-group">
+      <div class="cl-head"><span class="dot {{ g.dot }}"></span><span class="cl-name">{{ g.name }}</span><span class="cl-count">{{ g.accts|length }}</span></div>
+      <div class="cl-accts">
+        {% for a in g.accts %}
+        <a class="cl-acct" href="{{ url_for('accounts.detail', account_id=a.id) }}">
+          <span class="dot {{ a.dot }}" style="width:6px;height:6px"></span><span class="lbl">{{ a.label }}</span><span class="plat">{{ a.plat }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="sb-foot">
+    <svg class="iso" viewBox="0 0 40 40" fill="none">
+      <circle cx="17" cy="22" r="13" fill="#22E0BE"/><path d="M17 22 L17 9 A13 13 0 0 1 28 16 Z" fill="#3333FF"/><path d="M16 11 L34 20 L16 29 Z" fill="#FFE100"/>
+    </svg>
+    <div class="sb-user">
+      <div class="nm">{{ (user and user.name) or 'Equipo DITO' }}</div>
+      <div class="em">{{ (user and user.email) or 'sesión local' }}</div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  {# ── Topbar ────────────────────────────────────────────────────────── #}
+  <div class="topbar">
+    <button class="hamb" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('scrim').classList.toggle('open')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+    <div class="seg">
+      <a href="{{ url_for('dashboard.index', slug='google', period=b.period) }}" class="{{ 'active' if b.slug == 'google' }}"><span class="pdot pg"></span>Google</a>
+      <a href="{{ url_for('dashboard.index', slug='facebook', period=b.period) }}" class="{{ 'active' if b.slug == 'facebook' }}"><span class="pdot pf"></span>Facebook</a>
+    </div>
+    <div class="tb-right">
+      <div class="datepill" id="datepill" onclick="toggleDP(event)">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>{{ b.period_label }}</span>
+        <svg class="cd" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="updated"><span class="pulse"></span>actualizado {{ b.freshness.human }}</div>
+      <button class="themetoggle" type="button" onclick="toggleTheme()" title="Cambiar tema" aria-label="Cambiar tema">
+        <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke-width="1.75"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke-width="1.75"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <div class="dp" id="dp" onclick="event.stopPropagation()">
+        <div class="dp-presets">
+          {% for key, label in presets %}
+          <a class="dp-preset {{ 'active' if key == b.period }}" href="{{ url_for('dashboard.index', slug=b.slug, period=key) }}">{{ label }}</a>
+          {% endfor %}
+          <div class="dp-sep"></div>
+          <div class="dp-custom {{ 'active' if b.period.startswith('custom:') }}">
+            <div class="dp-custom-h">Personalizado</div>
+            <input type="hidden" id="dpRange">
+            <button class="dp-applybtn" type="button" onclick="applyCustom('{{ b.slug }}')">Aplicar rango</button>
+          </div>
+        </div>
+        <div class="dp-foot">
+          <div class="dp-compare">Comparar<span class="toggle" id="cmpToggle" onclick="this.classList.toggle('on')"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll">
+    {# ── Greeting ──────────────────────────────────────────────────────── #}
+    <div class="greet reveal">
+      <h1>{{ greeting }}<span class="tri-marker"></span></h1>
+      <div class="sub">
+        {% if b.summary.needs_attention %}<b>{{ b.summary.needs_attention }} cuenta{{ 's' if b.summary.needs_attention != 1 }}</b> necesita{{ 'n' if b.summary.needs_attention != 1 }} atención · {{ b.summary.ok }} en orden{% else %}<b>Todo en orden</b> · {{ b.summary.total }} cuenta{{ 's' if b.summary.total != 1 }} sin novedad{% endif %}
+      </div>
+    </div>
+
+    {# ── Temporal cards ────────────────────────────────────────────────── #}
+    <div class="temporal reveal" style="animation-delay:.05s">
+      {% for c in b.cards %}
+      <a class="tcard {{ 'sel' if c.period == b.period }}" href="{{ url_for('dashboard.index', slug=b.slug, period=c.period) }}">
+        <div class="arrow"><svg viewBox="0 0 24 24" stroke-width="1.75"><path d="M7 17 17 7M7 7h10v10"/></svg></div>
+        <div class="q">{{ c.title }}</div>
+        <div class="signal"><span class="dots">{% for d in c.dots %}<span class="dot {{ d }}"></span>{% endfor %}</span>{{ c.signal }}</div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {# ── Anomaly zone ──────────────────────────────────────────────────── #}
+    {% if b.anomalies %}
+    <div class="sec-title reveal" style="animation-delay:.12s">
+      <h2>¿qué necesita atención?</h2>
+      {% if b.anomaly_counts.critical %}<span class="badge">{{ b.anomaly_counts.critical }} crítica{{ 's' if b.anomaly_counts.critical != 1 }}</span>{% endif %}
+    </div>
+    <div class="anoms reveal" style="animation-delay:.14s">
+      {% for a in b.anomalies %}
+      {% set sevcls = 'crit' if a.severity == 'critical' else ('pos' if a.severity == 'positive' else 'warn') %}
+      {% set sevlbl = 'crítico' if a.severity == 'critical' else ('oportunidad' if a.severity == 'positive' else 'atención') %}
+      <div class="anom {{ sevcls }}">
+        <div class="bar"></div>
+        <div class="body">
+          <div class="row1"><span class="sev">{{ sevlbl }}</span><span class="acct">{{ a.account_name }}</span></div>
+          <h3>{{ a.title }}</h3>
+          <p>{{ a.message }}</p>
+          <div class="ai"><span class="tri"></span><span>análisis IA</span>
+            <a class="why" href="{{ url_for('accounts.detail', account_id=a.account_id) }}">ver por qué →</a></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {# ── Worst-first table ─────────────────────────────────────────────── #}
+    <div class="sec-title reveal" style="animation-delay:.18s"><h2>todas las cuentas</h2><span class="note">peor primero</span></div>
+    <div class="tablewrap reveal" style="animation-delay:.2s">
+      {% if b.accounts %}
+      <table>
+        <thead><tr>
+          <th>Cuenta</th><th>Estado</th>
+          <th class="num">Inversión · período / mes</th>
+          <th class="num">Costo / resultado</th><th class="num">ROAS</th>
+          <th class="num">Δ vs período previo</th><th class="num">Pacing</th>
+        </tr></thead>
+        <tbody>
+          {% for r in b.accounts %}
+          <tr class="clickable"
+              data-name="{{ r.name }}" data-type="{{ r.type_label }}" data-dot="{{ r.dot }}"
+              data-cost="{{ r.cells.cost }}" data-costctx="{{ r.cells.cost_ctx }}"
+              data-roas="{{ r.cells.roas }}" data-mtd="{{ r.cells.mtd }} {{ r.cells.currency }}"
+              data-pace="{{ r.cells.pace.pct }}" data-pacelbl="{{ r.cells.pace.cls }}"
+              data-ai="{{ r.ai }}" data-url="{{ url_for('accounts.detail', account_id=r.id) }}"
+              onclick="openDrawer(this)">
+            <td><div class="acct-cell"><span class="dot {{ r.dot }}"></span><div class="meta"><div class="nm">{{ r.name }}</div><div class="ty">{{ r.type_label }}</div></div></div></td>
+            <td><span class="tcardlabel">Estado</span><div class="statuscell {{ r.dot }}"><span class="lbl">{{ r.status_label }}</span></div></td>
+            <td class="num spend"><span class="tcardlabel">Inversión</span><div><div class="big">{{ r.cells.spend }}</div><div class="mtd">mes {{ r.cells.mtd }} {{ r.cells.currency }}</div></div></td>
+            <td class="num cost"><span class="tcardlabel">Costo / resultado</span><div><div class="big {{ 'muted' if r.cells.cost == '—' }}">{{ r.cells.cost }}</div>
+              {% if r.cells.cost_ctx or r.cells.cost_chip %}<div class="ctx">{{ r.cells.cost_ctx }}{% if r.cells.cost_chip %}<span class="chip {{ r.cells.cost_chip.cls }}">{{ r.cells.cost_chip.text }}</span>{% endif %}</div>{% endif %}</div></td>
+            <td class="num roas"><span class="tcardlabel">ROAS</span><span class="big {{ r.cells.roas_cls }}">{{ r.cells.roas }}</span></td>
+            <td class="num"><span class="tcardlabel">Δ vs previo</span>{% if r.cells.delta_chip %}<span class="chip {{ r.cells.delta_chip.cls }}">{{ r.cells.delta_chip.text }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+            <td class="num"><span class="tcardlabel">Pacing</span><div class="pace {{ r.cells.pace.cls }}"><span class="pct">{{ r.cells.pace.pct }}</span><span class="arrow">{{ r.cells.pace.arrow }}</span></div></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No hay cuentas activas para {{ b.platform_label }} en este período.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{# ── Scrim + quick drawer ──────────────────────────────────────────────── #}
+<div class="scrim" id="scrim" onclick="closeDrawer();document.getElementById('sidebar').classList.remove('open');this.classList.remove('open')"></div>
+<div class="drawer" id="drawer">
+  <div class="dr-head"><div class="top"><span class="dot" id="drDot"></span>
+    <button class="dr-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <h2 id="drName"></h2><div class="ty" id="drType"></div>
+  </div>
+  <div class="dr-body" id="drBody"></div>
+  <div class="dr-foot">
+    <a class="btn btn-primary" id="drOpen" href="#"><svg viewBox="0 0 24 24" stroke-width="1.75"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>Abrir panel completo</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/es.js"></script>
+<script>
+function toggleDP(e){e.stopPropagation();document.getElementById('dp').classList.toggle('open');document.getElementById('datepill').classList.toggle('open');}
+var dpFp = flatpickr("#dpRange", {
+  inline: true, mode: "range", dateFormat: "Y-m-d",
+  locale: (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.es) ? "es" : "default",
+  defaultDate: ["{{ b.start_date }}", "{{ b.end_date }}"]
+});
+function applyCustom(slug){
+  var d = dpFp ? dpFp.selectedDates : [];
+  if(d.length < 2){ return; }
+  var s = dpFp.formatDate(d[0], "Y-m-d"), e = dpFp.formatDate(d[1], "Y-m-d");
+  location.href = '/' + slug + '?period=custom:' + s + ',' + e;
+}
+function toggleTheme(){
+  var cur=document.documentElement.getAttribute('data-theme')==='dark'?'':'dark';
+  if(cur){document.documentElement.setAttribute('data-theme','dark');}
+  else{document.documentElement.removeAttribute('data-theme');}
+  try{localStorage.setItem('dito-theme',cur);}catch(e){}
+}
+function closeDP(){document.getElementById('dp').classList.remove('open');document.getElementById('datepill').classList.remove('open');}
+document.addEventListener('click',closeDP);
+
+document.getElementById('search').addEventListener('input',function(e){
+  var q=e.target.value.toLowerCase();
+  document.querySelectorAll('.cl-group').forEach(function(g){
+    g.style.display=g.querySelector('.cl-name').textContent.toLowerCase().indexOf(q)>-1?'':'none';
+  });
+});
+
+function openDrawer(tr){
+  var d=tr.dataset;
+  document.getElementById('drDot').className='dot '+d.dot;
+  document.getElementById('drName').textContent=d.name;
+  document.getElementById('drType').textContent=d.type;
+  document.getElementById('drOpen').href=d.url;
+  document.getElementById('drBody').innerHTML=
+    '<div class="dr-metrics">'+
+      '<div class="dr-m"><div class="lab">Costo / resultado</div><div class="v">'+d.cost+'</div><div class="n">'+(d.costctx||'')+'</div></div>'+
+      '<div class="dr-m"><div class="lab">ROAS</div><div class="v">'+d.roas+'</div><div class="n">inversión mes: '+d.mtd+'</div></div>'+
+      '<div class="dr-m"><div class="lab">Pacing</div><div class="v">'+d.pace+'</div><div class="n">'+(d.pacelbl||'')+'</div></div>'+
+      '<div class="dr-m"><div class="lab">Estado</div><div class="v" style="font-size:15px">'+d.type+'</div><div class="n">cuenta</div></div>'+
+    '</div>'+
+    '<div class="dr-ai"><div class="h"><span class="tri"></span><span>análisis IA</span></div><p>'+d.ai+'</p></div>';
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('scrim').classList.add('open');
+}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('scrim').classList.remove('open');}
+</script>
+</body>
+</html>
